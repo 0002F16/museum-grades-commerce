@@ -63,7 +63,7 @@ export function ConditionMeter({ condition }: ConditionMeterProps) {
           <span
             key={index}
             className={cn(
-              "flex-1 text-center text-[11px]",
+              "flex-1 text-center text-[10px] leading-tight md:text-[11px]",
               activeIndex === index ? "font-semibold" : "font-normal"
             )}
             style={{
@@ -73,7 +73,11 @@ export function ConditionMeter({ condition }: ConditionMeterProps) {
                   : "rgba(25,28,31,0.55)",
             }}
           >
-            {label}
+            {/* Abbreviate on mobile */}
+            <span className="md:hidden">
+              {label === "Shows Wear" ? "Wear" : label === "Excellent" ? "Excl." : label}
+            </span>
+            <span className="hidden md:inline">{label}</span>
           </span>
         ))}
       </div>

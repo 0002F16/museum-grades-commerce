@@ -1,130 +1,306 @@
-import { seedProducts } from "./seed-data";
-import type { Product, ProductFilters, FilterGroup } from "@/types/product";
+import "server-only";
+import { and, asc, desc, eq, gte, lte, ilike, or, sql, inArray } from "drizzle-orm";
+import { db } from "@/db";
+import { brands, categories, products, productImages } from "@/db/schema";
+import type {
+  Product,
+  ProductFilters,
+  FilterGroup,
+  CategoryItem,
+} from "@/types/product";
 
-// ─── helpers ──────────────────────────────────────────────────────────────────
+export type { CategoryItem } from "@/types/product";
 
-function matchesFilters(p: Product, filters: ProductFilters): boolean {
+// ─── row → Product adapter ──────────────────────────────────────────────────
+
+type ProductRow = typeof products.$inferSelect & {
+  brandName: string;
+  categoryName: string;
+};
+
+function rowToProduct(row: ProductRow, images: string[]): Product {
+  return {
+    id: row.id,
+    slug: row.slug,
+    brand: row.brandName,
+    name: row.name,
+    price: row.price,
+    estRetail: row.estRetail,
+    savingsPercent: row.savingsPercent,
+    condition: row.condition as Product["condition"],
+    color: row.color,
+    material: row.material,
+    bagType: row.categoryName,
+    images,
+    description: row.description,
+    itemNumber: row.itemNumber,
+    exterior: row.exterior,
+    hardware: row.hardware,
+    interior: row.interior,
+    comesWith: row.comesWith,
+    size: {
+      base: row.sizeBase,
+      height: row.sizeHeight,
+      depth: row.sizeDepth,
+      drop: row.sizeDrop,
+    },
+  };
+}
+
+// Fetch images for a set of product ids, ordered by position, grouped by product.
+async function imagesByProduct(
+  productIds: string[]
+): Promise<Map<string, string[]>> {
+  const map = new Map<string, string[]>();
+  if (productIds.length === 0) return map;
+  const rows = await db
+    .select()
+    .from(productImages)
+    .where(inArray(productImages.productId, productIds))
+    .orderBy(asc(productImages.position));
+  for (const img of rows) {
+    if (!map.has(img.productId)) map.set(img.productId, []);
+    map.get(img.productId)!.push(img.url);
+  }
+  return map;
+}
+
+function buildWhere(filters: ProductFilters) {
+  const conds = [];
   if (filters.query) {
-    const q = filters.query.toLowerCase();
-    const haystack = [p.name, p.brand, p.description, p.color, p.material, p.bagType]
-      .join(" ")
-      .toLowerCase();
-    if (!haystack.includes(q)) return false;
+    const like = `%${filters.query}%`;
+    conds.push(
+      or(
+        ilike(products.name, like),
+        ilike(brands.name, like),
+        ilike(products.description, like),
+        ilike(products.color, like),
+        ilike(products.material, like),
+        ilike(categories.name, like)
+      )
+    );
   }
-  if (filters.brand && p.brand !== filters.brand) return false;
-  if (filters.condition && p.condition !== filters.condition) return false;
-  if (filters.color && p.color !== filters.color) return false;
-  if (filters.material && p.material !== filters.material) return false;
-  if (filters.bagType && p.bagType !== filters.bagType) return false;
-  if (filters.priceMin !== undefined && p.price < filters.priceMin) return false;
-  if (filters.priceMax !== undefined && p.price > filters.priceMax) return false;
-  return true;
+  if (filters.brand) conds.push(eq(brands.name, filters.brand));
+  if (filters.condition) conds.push(eq(products.condition, filters.condition));
+  if (filters.color) conds.push(eq(products.color, filters.color));
+  if (filters.material) conds.push(eq(products.material, filters.material));
+  if (filters.bagType) conds.push(eq(categories.name, filters.bagType));
+  if (filters.priceMin !== undefined)
+    conds.push(gte(products.price, filters.priceMin));
+  if (filters.priceMax !== undefined)
+    conds.push(lte(products.price, filters.priceMax));
+  return conds.length > 0 ? and(...conds) : undefined;
 }
 
-function sortProducts(products: Product[], sort?: ProductFilters["sort"]): Product[] {
-  const list = [...products];
-  if (sort === "price-asc") return list.sort((a, b) => a.price - b.price);
-  if (sort === "price-desc") return list.sort((a, b) => b.price - a.price);
-  // "newest" — keep seed order (most recently added first)
-  return list;
+const baseSelect = {
+  id: products.id,
+  slug: products.slug,
+  brandId: products.brandId,
+  categoryId: products.categoryId,
+  name: products.name,
+  price: products.price,
+  estRetail: products.estRetail,
+  savingsPercent: products.savingsPercent,
+  condition: products.condition,
+  color: products.color,
+  material: products.material,
+  description: products.description,
+  itemNumber: products.itemNumber,
+  exterior: products.exterior,
+  hardware: products.hardware,
+  interior: products.interior,
+  comesWith: products.comesWith,
+  sizeBase: products.sizeBase,
+  sizeHeight: products.sizeHeight,
+  sizeDepth: products.sizeDepth,
+  sizeDrop: products.sizeDrop,
+  createdAt: products.createdAt,
+  brandName: brands.name,
+  categoryName: categories.name,
+} as const;
+
+// ─── public API (same signatures as before, now async + DB-backed) ───────────
+
+export async function getProducts(
+  filters: ProductFilters = {}
+): Promise<{ products: Product[]; total: number }> {
+  try {
+    const pageSize = filters.pageSize ?? 24;
+    const page = filters.page ?? 1;
+    const where = buildWhere(filters);
+
+    const orderBy =
+      filters.sort === "price-asc"
+        ? asc(products.price)
+        : filters.sort === "price-desc"
+          ? desc(products.price)
+          : desc(products.createdAt); // "newest"
+
+    const rows = await db
+      .select(baseSelect)
+      .from(products)
+      .innerJoin(brands, eq(products.brandId, brands.id))
+      .innerJoin(categories, eq(products.categoryId, categories.id))
+      .where(where)
+      .orderBy(orderBy)
+      .limit(pageSize)
+      .offset((page - 1) * pageSize);
+
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(products)
+      .innerJoin(brands, eq(products.brandId, brands.id))
+      .innerJoin(categories, eq(products.categoryId, categories.id))
+      .where(where);
+
+    const imgMap = await imagesByProduct(rows.map((r) => r.id));
+    const list = rows.map((r) => rowToProduct(r, imgMap.get(r.id) ?? []));
+
+    return { products: list, total: count };
+  } catch (err) {
+    console.error("getProducts failed:", err);
+    return { products: [], total: 0 };
+  }
 }
 
-// ─── public API (same signatures as the SQLite version) ───────────────────────
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  try {
+    const [row] = await db
+      .select(baseSelect)
+      .from(products)
+      .innerJoin(brands, eq(products.brandId, brands.id))
+      .innerJoin(categories, eq(products.categoryId, categories.id))
+      .where(eq(products.slug, slug))
+      .limit(1);
 
-export function getProducts(filters: ProductFilters = {}): {
-  products: Product[];
-  total: number;
-} {
-  const pageSize = filters.pageSize ?? 24;
-  const page = filters.page ?? 1;
-
-  const filtered = seedProducts.filter((p) => matchesFilters(p, filters));
-  const sorted = sortProducts(filtered, filters.sort);
-  const total = sorted.length;
-  const products = sorted.slice((page - 1) * pageSize, page * pageSize);
-
-  return { products, total };
+    if (!row) return null;
+    const imgMap = await imagesByProduct([row.id]);
+    return rowToProduct(row, imgMap.get(row.id) ?? []);
+  } catch (err) {
+    console.error("getProductBySlug failed:", err);
+    return null;
+  }
 }
 
-export function getProductBySlug(slug: string): Product | null {
-  return seedProducts.find((p) => p.slug === slug) ?? null;
+export async function getAllProducts(): Promise<Product[]> {
+  try {
+    const rows = await db
+      .select(baseSelect)
+      .from(products)
+      .innerJoin(brands, eq(products.brandId, brands.id))
+      .innerJoin(categories, eq(products.categoryId, categories.id))
+      .orderBy(desc(products.createdAt));
+
+    const imgMap = await imagesByProduct(rows.map((r) => r.id));
+    return rows.map((r) => rowToProduct(r, imgMap.get(r.id) ?? []));
+  } catch (err) {
+    console.error("getAllProducts failed:", err);
+    return [];
+  }
 }
 
-export function getAllProducts(): Product[] {
-  return [...seedProducts];
+export async function getCategories(): Promise<CategoryItem[]> {
+  try {
+    const rows = await db
+      .select({
+        name: categories.name,
+        displayOrder: categories.displayOrder,
+        count: sql<number>`count(${products.id})::int`,
+        image: sql<string | null>`(
+          select pi.url from ${productImages} pi
+          where pi.product_id = (
+            select p2.id from ${products} p2
+            where p2.category_id = ${categories.id}
+            order by p2.created_at desc limit 1
+          )
+          order by pi.position asc limit 1
+        )`,
+      })
+      .from(categories)
+      .leftJoin(products, eq(products.categoryId, categories.id))
+      .groupBy(categories.id)
+      .orderBy(asc(categories.displayOrder));
+
+    return rows
+      .filter((r) => r.count > 0)
+      .map((r) => ({
+        name: r.name,
+        image: r.image ?? "",
+        href: `/collections/all-bags?bagType=${encodeURIComponent(r.name)}`,
+        count: r.count,
+      }));
+  } catch (err) {
+    console.error("getCategories failed:", err);
+    return [];
+  }
 }
 
-export interface CategoryItem {
-  name: string;
-  image: string;
-  href: string;
-  count: number;
-}
-
-// Preferred display order — only categories that have ≥1 product are returned
-const CATEGORY_ORDER = [
-  "Crossbody Bags",
-  "Shoulder Bags",
-  "Handbags",
-  "Totes",
-  "Backpacks",
-  "Clutches",
-  "Bucket Bags",
-  "Belt Bags",
-  "Hobo Bags",
-  "Satchels",
-];
-
-export function getCategories(): CategoryItem[] {
-  const map = new Map<string, { count: number; image: string }>();
-  for (const p of seedProducts) {
-    if (!map.has(p.bagType)) {
-      map.set(p.bagType, { count: 0, image: p.images[0] ?? "" });
+export async function getFacets(): Promise<FilterGroup[]> {
+  try {
+    async function countByColumn(
+      column: typeof products.color | typeof products.condition | typeof products.material
+    ): Promise<FilterGroup["options"]> {
+      const rows = await db
+        .select({ label: column, count: sql<number>`count(*)::int` })
+        .from(products)
+        .groupBy(column)
+        .orderBy(desc(sql`count(*)`));
+      return rows.map((r) => ({ label: r.label, count: r.count }));
     }
-    map.get(p.bagType)!.count += 1;
-  }
-  return CATEGORY_ORDER.filter((name) => (map.get(name)?.count ?? 0) > 0).map(
-    (name) => ({
-      name,
-      image: map.get(name)!.image,
-      href: `/collections/all-bags?bagType=${encodeURIComponent(name)}`,
-      count: map.get(name)!.count,
-    })
-  );
-}
 
-export function getFacets(_filters: ProductFilters = {}): FilterGroup[] {
-  // Counts are always global (across the full catalogue) for discoverability
-  function countBy(key: keyof Product): FilterGroup["options"] {
-    const map = new Map<string, number>();
-    for (const p of seedProducts) {
-      const val = String(p[key]);
-      map.set(val, (map.get(val) ?? 0) + 1);
+    const brandRows = await db
+      .select({ label: brands.name, count: sql<number>`count(${products.id})::int` })
+      .from(brands)
+      .leftJoin(products, eq(products.brandId, brands.id))
+      .groupBy(brands.name)
+      .orderBy(desc(sql`count(${products.id})`));
+
+    const bagTypeRows = await db
+      .select({ label: categories.name, count: sql<number>`count(${products.id})::int` })
+      .from(categories)
+      .leftJoin(products, eq(products.categoryId, categories.id))
+      .groupBy(categories.name)
+      .orderBy(desc(sql`count(${products.id})`));
+
+    const priceTiers: { label: string; min: number; max?: number }[] = [
+      { label: "Under $500", min: 0, max: 500 },
+      { label: "$500 – $1,000", min: 500, max: 1000 },
+      { label: "$1,000 – $2,500", min: 1000, max: 2500 },
+      { label: "$2,500 – $5,000", min: 2500, max: 5000 },
+      { label: "Over $5,000", min: 5000 },
+    ];
+
+    const priceOptions: FilterGroup["options"] = [];
+    for (const { label, min, max } of priceTiers) {
+      const cond = max !== undefined
+        ? and(gte(products.price, min), lte(products.price, max - 1))
+        : gte(products.price, min);
+      const [{ count }] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(products)
+        .where(cond);
+      priceOptions.push({ label, count });
     }
-    return Array.from(map.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([label, count]) => ({ label, count }));
+
+    const [brandFacet, conditionFacet, bagTypeFacet, colorFacet, materialFacet] =
+      [
+        brandRows.filter((r) => r.count > 0),
+        await countByColumn(products.condition),
+        bagTypeRows.filter((r) => r.count > 0),
+        await countByColumn(products.color),
+        await countByColumn(products.material),
+      ];
+
+    return [
+      { name: "Designers", options: brandFacet },
+      { name: "Condition", options: conditionFacet },
+      { name: "Bag Type", options: bagTypeFacet },
+      { name: "Price", options: priceOptions },
+      { name: "Color", options: colorFacet },
+      { name: "Material", options: materialFacet },
+    ];
+  } catch (err) {
+    console.error("getFacets failed:", err);
+    return [];
   }
-
-  const priceTiers = [
-    { label: "Under $500", min: 0, max: 500 },
-    { label: "$500 – $1,000", min: 500, max: 1000 },
-    { label: "$1,000 – $2,500", min: 1000, max: 2500 },
-    { label: "$2,500 – $5,000", min: 2500, max: 5000 },
-    { label: "Over $5,000", min: 5000, max: Infinity },
-  ];
-
-  const priceOptions = priceTiers.map(({ label, min, max }) => ({
-    label,
-    count: seedProducts.filter((p) => p.price >= min && p.price < max).length,
-  }));
-
-  return [
-    { name: "Designers", options: countBy("brand") },
-    { name: "Condition", options: countBy("condition") },
-    { name: "Bag Type", options: countBy("bagType") },
-    { name: "Price", options: priceOptions },
-    { name: "Color", options: countBy("color") },
-    { name: "Material", options: countBy("material") },
-  ];
 }

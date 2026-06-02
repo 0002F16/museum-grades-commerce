@@ -6,7 +6,7 @@ export function Footer() {
       className="border-t"
       style={{ borderTopColor: "rgb(229,229,229)", backgroundColor: "rgb(255,255,255)" }}
     >
-      <div className="flex flex-col gap-8 px-[42px] py-12 md:flex-row md:items-start md:justify-between">
+      <div className="flex flex-col gap-8 px-4 py-12 md:flex-row md:items-start md:justify-between md:px-[42px]">
         {/* Brand */}
         <div className="max-w-[320px]">
           <p
@@ -50,7 +50,7 @@ export function Footer() {
       </div>
 
       <div
-        className="border-t px-[42px] py-5"
+        className="border-t px-4 py-5 md:px-[42px]"
         style={{ borderTopColor: "rgb(229,229,229)" }}
       >
         <p className="text-[12px]" style={{ color: "rgba(25,28,31,0.5)" }}>

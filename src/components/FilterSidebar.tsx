@@ -138,6 +138,7 @@ export function FilterSidebar({ facets, currentFilters, total }: FilterSidebarPr
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   function updateFilter(key: keyof CurrentFilters, value: string | undefined) {
     const params = new URLSearchParams(searchParams.toString());
@@ -159,36 +160,48 @@ export function FilterSidebar({ facets, currentFilters, total }: FilterSidebarPr
   );
 
   return (
-    <aside className="w-[280px] min-w-[280px] flex-shrink-0">
-      <div className="flex items-baseline justify-between pb-3">
-        <h2 className="text-[24px] font-medium" style={{ color: "rgb(25,28,31)" }}>
+    <aside className="w-full md:w-[280px] md:min-w-[280px] md:flex-shrink-0">
+      {/* Mobile: tappable header that toggles filters */}
+      <button
+        className="flex w-full items-center justify-between pb-3 md:cursor-default"
+        onClick={() => setMobileOpen((o) => !o)}
+        aria-expanded={mobileOpen}
+      >
+        <h2 className="text-[20px] font-medium md:text-[24px]" style={{ color: "rgb(25,28,31)" }}>
           Filter
         </h2>
-        <span className="text-[16px]" style={{ color: "rgb(89,89,89)" }}>
+        <span className="text-[15px]" style={{ color: "rgb(89,89,89)" }}>
           {total.toLocaleString()} Items
+          <ChevronDown
+            className={`ml-2 inline h-4 w-4 transition-transform md:hidden ${mobileOpen ? "rotate-180" : ""}`}
+            style={{ color: "rgb(25,28,31)" }}
+          />
         </span>
+      </button>
+
+      {/* Content: always visible md+, toggled on mobile */}
+      <div className={`${mobileOpen ? "block" : "hidden"} md:block`}>
+        {hasActiveFilters && (
+          <button
+            onClick={clearAll}
+            className="mb-4 flex h-[40px] w-full items-center justify-center gap-2 border text-[14px] font-medium"
+            style={{ borderColor: "rgb(25,28,31)", color: "rgb(25,28,31)" }}
+          >
+            <X className="h-4 w-4" />
+            Clear All Filters
+          </button>
+        )}
+
+        {facets.map((group) => (
+          <FilterSection
+            key={group.name}
+            group={group}
+            currentValue={currentFilters[GROUP_KEY[group.name]]}
+            onSelect={updateFilter}
+            showSearch={group.name === "Designers"}
+          />
+        ))}
       </div>
-
-      {hasActiveFilters && (
-        <button
-          onClick={clearAll}
-          className="mb-4 flex h-[40px] w-full items-center justify-center gap-2 border text-[14px] font-medium"
-          style={{ borderColor: "rgb(25,28,31)", color: "rgb(25,28,31)" }}
-        >
-          <X className="h-4 w-4" />
-          Clear All Filters
-        </button>
-      )}
-
-      {facets.map((group) => (
-        <FilterSection
-          key={group.name}
-          group={group}
-          currentValue={currentFilters[GROUP_KEY[group.name]]}
-          onSelect={updateFilter}
-          showSearch={group.name === "Designers"}
-        />
-      ))}
     </aside>
   );
 }

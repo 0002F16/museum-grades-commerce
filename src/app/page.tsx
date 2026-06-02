@@ -11,10 +11,10 @@ export const metadata = {
     "Discover the world's finest pre-owned luxury handbags. Curated, authenticated, and graded by Museum Grades.",
 };
 
-export default function HomePage() {
-  const { products: featured } = getProducts({ pageSize: 8, sort: "newest" });
-  const { products: moreProducts } = getProducts({ pageSize: 12, sort: "price-desc" });
-  const facets = getFacets();
+export default async function HomePage() {
+  const { products: featured } = await getProducts({ pageSize: 8, sort: "newest" });
+  const { products: moreProducts } = await getProducts({ pageSize: 12, sort: "price-desc" });
+  const facets = await getFacets();
   const designerFacet = facets.find((f) => f.name === "Designers");
   const designers = designerFacet?.options.slice(0, 8) ?? [];
 
@@ -53,7 +53,7 @@ export default function HomePage() {
               The Collector&apos;s Catalogue
             </p>
             <h1
-              className="text-[56px] font-medium leading-[1.05]"
+              className="text-[36px] font-medium leading-[1.05] md:text-[56px]"
               style={{ color: "rgb(255,255,255)", letterSpacing: "-0.02em" }}
             >
               Museum Grades
@@ -76,10 +76,10 @@ export default function HomePage() {
         </section>
 
         {/* ── Featured Acquisitions ───────────────────────────────────── */}
-        <section className="px-[42px] py-12">
-          <div className="mb-8 flex items-baseline justify-between">
+        <section className="px-4 py-8 md:px-[42px] md:py-12">
+          <div className="mb-6 flex items-baseline justify-between md:mb-8">
             <h2
-              className="text-[24px] font-medium"
+              className="text-[20px] font-medium md:text-[24px]"
               style={{ color: "rgb(25,28,31)" }}
             >
               Featured Acquisitions
@@ -93,7 +93,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:gap-x-8 md:gap-y-10 lg:grid-cols-4">
             {featured.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -103,21 +103,21 @@ export default function HomePage() {
         {/* ── Shop by Designer ────────────────────────────────────────── */}
         {designers.length > 0 && (
           <section
-            className="px-[42px] py-10"
+            className="px-4 py-8 md:px-[42px] md:py-10"
             style={{ backgroundColor: "rgb(250,250,250)" }}
           >
             <h2
-              className="mb-6 text-[18px] font-medium uppercase tracking-[2px]"
+              className="mb-5 text-[16px] font-medium uppercase tracking-[2px] md:mb-6 md:text-[18px]"
               style={{ color: "rgb(25,28,31)" }}
             >
               Shop by Designer
             </h2>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2 md:gap-3">
               {designers.map(({ label }) => (
                 <Link
                   key={label}
                   href={`/collections/all-bags?brand=${encodeURIComponent(label)}`}
-                  className="border px-5 py-2 text-[13px] font-medium transition-colors hover:bg-[rgb(25,28,31)] hover:text-white"
+                  className="border px-4 py-2 text-[12px] font-medium transition-colors hover:bg-[rgb(25,28,31)] hover:text-white md:px-5 md:text-[13px]"
                   style={{
                     borderColor: "rgb(25,28,31)",
                     color: "rgb(25,28,31)",
@@ -128,7 +128,7 @@ export default function HomePage() {
               ))}
               <Link
                 href="/collections/all-bags"
-                className="border px-5 py-2 text-[13px] font-medium transition-colors hover:bg-[rgb(25,28,31)] hover:text-white"
+                className="border px-4 py-2 text-[12px] font-medium transition-colors hover:bg-[rgb(25,28,31)] hover:text-white md:px-5 md:text-[13px]"
                 style={{
                   borderColor: "rgba(25,28,31,0.35)",
                   color: "rgba(25,28,31,0.65)",
@@ -142,14 +142,14 @@ export default function HomePage() {
 
         {/* ── More to Explore (scroller) ──────────────────────────────── */}
         {moreToExplore.length > 0 && (
-          <section className="px-[42px] py-12">
+          <section className="px-4 py-8 md:px-[42px] md:py-12">
             <RecommendedProducts products={moreToExplore} title="More to Explore" />
           </section>
         )}
 
         {/* ── About / Value Props ─────────────────────────────────────── */}
         <section
-          className="px-[42px] py-16"
+          className="px-4 py-12 md:px-[42px] md:py-16"
           style={{ backgroundColor: "rgb(245,245,245)" }}
         >
           <h2

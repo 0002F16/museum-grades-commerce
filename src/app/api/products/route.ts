@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getProducts, getFacets } from "@/lib/products";
 import type { ProductFilters } from "@/types/product";
 
-export function GET(req: NextRequest) {
+export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
 
   const filters: ProductFilters = {};
@@ -18,8 +18,10 @@ export function GET(req: NextRequest) {
   if (sp.get("page")) filters.page = Number(sp.get("page"));
   if (sp.get("pageSize")) filters.pageSize = Number(sp.get("pageSize"));
 
-  const { products, total } = getProducts(filters);
-  const facets = getFacets(filters);
+  const [{ products, total }, facets] = await Promise.all([
+    getProducts(filters),
+    getFacets(),
+  ]);
 
   return NextResponse.json({ products, total, facets });
 }

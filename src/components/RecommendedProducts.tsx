@@ -28,7 +28,7 @@ export function RecommendedProducts({
   return (
     <div className="relative">
       <h2
-        className="mb-6 text-[24px] font-medium"
+        className="mb-4 text-[18px] font-medium md:mb-6 md:text-[24px]"
         style={{ color: "rgb(25,28,31)" }}
       >
         {title}
@@ -41,7 +41,7 @@ export function RecommendedProducts({
           style={{ scrollbarWidth: "none" }}
         >
           {products.map((product) => (
-            <div key={product.id} className="w-[220px] flex-shrink-0">
+            <div key={product.id} className="w-[160px] flex-shrink-0 md:w-[220px]">
               <ProductCard product={product} />
             </div>
           ))}
@@ -50,7 +50,7 @@ export function RecommendedProducts({
         {/* Left arrow */}
         <button
           onClick={() => scroll("left")}
-          className="absolute -left-4 top-1/3 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md"
+          className="absolute -left-4 top-1/3 hidden h-10 w-10 items-center justify-center rounded-full bg-white shadow-md md:flex"
           aria-label="Previous"
         >
           <ChevronLeft
@@ -62,7 +62,7 @@ export function RecommendedProducts({
         {/* Right arrow */}
         <button
           onClick={() => scroll("right")}
-          className="absolute -right-4 top-1/3 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md"
+          className="absolute -right-4 top-1/3 hidden h-10 w-10 items-center justify-center rounded-full bg-white shadow-md md:flex"
           aria-label="Next"
         >
           <ChevronRight

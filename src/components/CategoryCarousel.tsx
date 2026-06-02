@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import type { CategoryItem } from "@/lib/products";
+import type { CategoryItem } from "@/types/product";
 
 interface CategoryCarouselProps {
   categories: CategoryItem[];
@@ -33,10 +33,10 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
             key={cat.name}
             href={cat.href}
             className="group mx-[4.8px] flex flex-shrink-0 flex-col items-center"
-            style={{ width: "166px" }}
+            style={{ width: "120px" }}
           >
             <div
-              className="mb-2 h-[150px] w-full overflow-hidden"
+              className="mb-2 h-[110px] w-full overflow-hidden md:h-[150px]"
               style={{ backgroundColor: "rgb(245,245,245)" }}
             >
               {cat.image ? (
@@ -73,14 +73,14 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
         <>
           <button
             onClick={() => scroll("left")}
-            className="absolute -left-4 top-[60px] flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-opacity hover:opacity-80"
+            className="absolute -left-4 top-[60px] hidden h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-opacity hover:opacity-80 md:flex"
             aria-label="Slide left"
           >
             <ChevronLeft className="h-5 w-5" style={{ color: "rgb(25,28,31)" }} />
           </button>
           <button
             onClick={() => scroll("right")}
-            className="absolute -right-4 top-[60px] flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-opacity hover:opacity-80"
+            className="absolute -right-4 top-[60px] hidden h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-opacity hover:opacity-80 md:flex"
             aria-label="Slide right"
           >
             <ChevronRight className="h-5 w-5" style={{ color: "rgb(25,28,31)" }} />

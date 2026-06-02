@@ -46,9 +46,11 @@ export default async function AllBagsPage({ searchParams }: PageProps) {
     ...parsePriceRange(getString(sp.price)),
   };
 
-  const { products, total } = getProducts(filters);
-  const facets = getFacets();
-  const categories = getCategories();
+  const [{ products, total }, facets, categories] = await Promise.all([
+    getProducts(filters),
+    getFacets(),
+    getCategories(),
+  ]);
 
   const currentFilters = {
     brand: getString(sp.brand),
@@ -65,20 +67,20 @@ export default async function AllBagsPage({ searchParams }: PageProps) {
       <Header />
       <main className="flex-1">
         {/* Page heading */}
-        <div className="px-[42px] pt-8 pb-2">
+        <div className="px-4 md:px-[42px] pt-8 pb-2">
           <h1 className="text-[20px] font-semibold uppercase tracking-[2px] text-[rgb(25,28,31)]">
             All Bags
           </h1>
         </div>
 
         {/* Category carousel */}
-        <div className="px-[42px] pb-6">
+        <div className="px-4 md:px-[42px] pb-6">
           <CategoryCarousel categories={categories} />
         </div>
 
         {/* Filter + Product Grid */}
-        <div className="flex px-[42px] pb-12 gap-8">
-          <Suspense fallback={<div className="w-[280px] min-w-[280px]" />}>
+        <div className="flex flex-col md:flex-row px-4 md:px-[42px] pb-12 gap-4 md:gap-8">
+          <Suspense fallback={<div className="hidden md:block w-[280px] min-w-[280px]" />}>
             <FilterSidebar
               facets={facets}
               currentFilters={currentFilters}

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ShieldCheck, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ConditionMeter } from "@/components/ConditionMeter";
+import { AddToCartButton } from "@/components/AddToCartButton";
 import type { Product } from "@/types/product";
 
 interface ProductInfoProps {
@@ -83,8 +84,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
       {/* Title */}
       <h1
-        className="text-[42px] font-medium"
-        style={{ lineHeight: "46.2px", color: "rgb(25,28,31)" }}
+        className="text-[28px] font-medium md:text-[42px]"
+        style={{ lineHeight: "1.1", color: "rgb(25,28,31)" }}
       >
         {product.name}
       </h1>
@@ -107,6 +108,19 @@ export function ProductInfo({ product }: ProductInfoProps) {
           </span>
         )}
       </div>
+
+      {/* Add to Bag */}
+      <AddToCartButton
+        item={{
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          brand: product.brand,
+          price: product.price,
+          image: product.images[0] ?? "",
+          condition: product.condition,
+        }}
+      />
 
       {/* Display-only notice */}
       <p

@@ -3,8 +3,10 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { Search, X, User, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSession } from "@/lib/auth-client";
+import { useCart } from "@/context/CartContext";
 
 const navLinks = [
   { label: "All Bags", href: "/collections/all-bags" },
@@ -16,6 +18,8 @@ export function Header() {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const { data: session } = useSession();
+  const { count, openCart } = useCart();
 
   // Focus the input whenever the search bar opens
   useEffect(() => {
@@ -55,7 +59,7 @@ export function Header() {
         className="flex h-[41px] w-full items-center justify-center px-4"
         style={{ backgroundColor: "rgb(26, 28, 31)" }}
       >
-        <p className="text-sm font-normal tracking-wider text-white">
+        <p className="truncate text-sm font-normal tracking-wider text-white">
           The world&apos;s finest pre-owned luxury handbags, curated with care.
         </p>
       </div>
@@ -95,8 +99,8 @@ export function Header() {
           ))}
         </ul>
 
-        {/* Right side: search icon or expanded search bar */}
-        <div className="flex items-center gap-3">
+        {/* Right side: account + search */}
+        <div className="flex items-center gap-4">
           {searchOpen ? (
             <form
               onSubmit={handleSubmit}
@@ -131,13 +135,46 @@ export function Header() {
               </button>
             </form>
           ) : (
-            <button
-              type="button"
-              aria-label="Open search"
-              onClick={openSearch}
-            >
-              <Search className="size-6" style={{ color: "rgb(25, 28, 31)" }} />
-            </button>
+            <>
+              {session ? (
+                <Link href="/account" aria-label="My account">
+                  <User className="size-5" style={{ color: "rgb(25,28,31)" }} />
+                </Link>
+              ) : (
+                <Link
+                  href="/sign-in"
+                  className="text-[12px] font-semibold uppercase tracking-[1.5px] transition-colors hover:opacity-70"
+                  style={{ color: "rgb(25,28,31)" }}
+                >
+                  Sign In
+                </Link>
+              )}
+              {/* Cart */}
+              <button
+                type="button"
+                aria-label="Open bag"
+                onClick={openCart}
+                className="relative"
+              >
+                <ShoppingBag className="size-6" style={{ color: "rgb(25, 28, 31)" }} />
+                {count > 0 && (
+                  <span
+                    className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                    style={{ backgroundColor: "rgb(25,28,31)" }}
+                  >
+                    {count > 9 ? "9+" : count}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                aria-label="Open search"
+                onClick={openSearch}
+              >
+                <Search className="size-6" style={{ color: "rgb(25, 28, 31)" }} />
+              </button>
+            </>
           )}
         </div>
       </nav>

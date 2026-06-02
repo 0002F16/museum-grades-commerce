@@ -75,7 +75,7 @@ export function ProductGrid({ products, total, currentSort, currentPage }: Produ
           No bags match your filters.
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:gap-x-8 md:gap-y-10 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

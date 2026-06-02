@@ -18,14 +18,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const query = getString(sp.q)?.trim() ?? "";
 
   const { products, total } = query
-    ? getProducts({ query, pageSize: 48 })
+    ? await getProducts({ query, pageSize: 48 })
     : { products: [], total: 0 };
 
   return (
     <>
       <Header />
 
-      <main className="flex-1 px-[42px] py-10">
+      <main className="flex-1 px-4 py-8 md:px-[42px] md:py-10">
         {/* Header row */}
         <div className="mb-8">
           {query ? (
@@ -63,7 +63,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
         {/* Results grid */}
         {products.length > 0 ? (
-          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:gap-x-8 md:gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

@@ -12,14 +12,14 @@ interface BreadcrumbsProps {
 
 export function Breadcrumbs({ items }: BreadcrumbsProps) {
   return (
-    <nav aria-label="Breadcrumb" className={cn("flex items-center gap-1 py-2")}>
+    <nav aria-label="Breadcrumb" className={cn("flex flex-wrap items-center gap-1 py-2")}>
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         return (
           <span key={index} className="flex items-center gap-1">
             {index > 0 && (
               <span
-                className="text-[16px]"
+                className="text-[13px] md:text-[16px]"
                 style={{ color: "rgba(25,28,31,0.75)" }}
               >
                 /
@@ -28,14 +28,14 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
             {item.href && !isLast ? (
               <Link
                 href={item.href}
-                className="text-[16px] hover:underline"
+                className="text-[13px] hover:underline md:text-[16px]"
                 style={{ color: "rgba(25,28,31,0.75)" }}
               >
                 {item.label}
               </Link>
             ) : (
               <span
-                className="text-[16px]"
+                className="text-[13px] md:text-[16px]"
                 style={{ color: "rgba(25,28,31,0.75)" }}
               >
                 {item.label}

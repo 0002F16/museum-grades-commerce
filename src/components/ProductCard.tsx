@@ -35,47 +35,37 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Product info */}
       <div className="mt-3">
         <p
-          className="mb-[6px] text-[14px] font-semibold uppercase"
-          style={{ letterSpacing: "2.1px", color: "rgb(25,28,31)" }}
+          className="mb-[5px] text-[11px] font-semibold uppercase md:text-[12px]"
+          style={{ letterSpacing: "1.8px", color: "rgb(25,28,31)" }}
         >
           {product.brand}
         </p>
         <Link
           href={`/products/${product.slug}`}
-          className="block text-[14px] leading-[1.3] hover:underline"
-          style={{ fontWeight: 200, color: "rgb(0,0,0)" }}
+          className="block text-[13px] leading-[1.35] hover:underline md:text-[14px]"
+          style={{ fontWeight: 300, color: "rgb(0,0,0)" }}
         >
           {product.name}
         </Link>
         <p
-          className="mt-1 text-[12px]"
-          style={{ fontWeight: 200, color: "rgb(89,89,89)" }}
+          className="mt-1 text-[11px] md:text-[12px]"
+          style={{ fontWeight: 300, color: "rgb(89,89,89)" }}
         >
-          Condition: {product.condition}
+          {product.condition}
         </p>
         <p
-          className="mt-[10px] text-[16px] font-medium"
+          className="mt-2 text-[14px] font-medium md:text-[16px]"
           style={{ color: "rgb(25,28,31)" }}
         >
           ${product.price.toLocaleString("en-US")}
         </p>
-        {product.estRetail > 0 && (
-          <div className="mt-1 flex items-center justify-center gap-2">
-            <span
-              className="text-[12px] font-medium"
-              style={{ color: "rgb(25,28,31)" }}
-            >
-              Est. Retail ${product.estRetail.toLocaleString("en-US")}
-            </span>
-            {product.savingsPercent > 0 && (
-              <span
-                className="text-[12px] font-semibold"
-                style={{ color: "rgb(0,128,0)" }}
-              >
-                {product.savingsPercent}% below retail
-              </span>
-            )}
-          </div>
+        {product.estRetail > 0 && product.savingsPercent > 0 && (
+          <p
+            className="mt-0.5 text-[11px] font-semibold md:text-[12px]"
+            style={{ color: "rgb(0,128,0)" }}
+          >
+            {product.savingsPercent}% off retail
+          </p>
         )}
       </div>
     </div>

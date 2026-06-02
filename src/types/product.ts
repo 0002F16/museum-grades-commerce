@@ -39,6 +39,7 @@ export interface CategoryItem {
   name: string;
   image: string;
   href: string;
+  count: number;
 }
 
 export interface ProductFilters {
