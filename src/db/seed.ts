@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { eq } from "drizzle-orm";
 import { seedProducts } from "../lib/seed-data";
+import { slugify } from "../lib/slug";
 import { brands, categories, products, productImages } from "./schema";
 
 // Standalone connection (does not import the server-only app client).
@@ -26,15 +27,6 @@ const CATEGORY_ORDER = [
   "Hobo Bags",
   "Satchels",
 ];
-
-function slugify(value: string): string {
-  return value
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "") // strip accents (Hermès -> Hermes)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 async function seed() {
   console.log(`Seeding ${seedProducts.length} products...`);

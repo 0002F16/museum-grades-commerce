@@ -1,0 +1,57 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_fonts.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Metropolis","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+:root{--ink:rgb(25,28,31);--slate:rgb(89,89,89);--lgray:rgb(112,112,112);--border:rgb(229,229,229);--green:rgb(0,128,0);}
+body{width:1080px;height:1350px;background:rgb(244,244,244);display:flex;align-items:center;justify-content:center;}
+.card{width:900px;height:1200px;background:#fff;border:1px solid var(--border);display:flex;flex-direction:column;}
+.head{background:var(--ink);color:#fff;padding:54px 60px;}
+.head .wm{font-size:30px;font-weight:700;letter-spacing:7px;text-transform:uppercase;}
+.head .sub{font-size:15px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:14px;}
+.body{flex:1;padding:60px;display:flex;flex-direction:column;}
+.title{font-size:20px;font-weight:600;letter-spacing:5px;text-transform:uppercase;color:var(--lgray);}
+.bag{font-size:46px;font-weight:200;letter-spacing:-0.01em;color:var(--ink);margin-top:18px;line-height:1.15;}
+.spec{margin-top:50px;border-top:1px solid var(--border);}
+.spec .r{display:flex;justify-content:space-between;align-items:center;padding:26px 0;border-bottom:1px solid var(--border);}
+.spec .l{font-size:16px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--lgray);}
+.spec .v{font-size:24px;font-weight:400;color:var(--ink);}
+.grade{display:flex;align-items:center;gap:14px;}
+.grade .badge{width:18px;height:18px;border:3px solid var(--green);}
+.grade .v{color:var(--green);font-weight:600;}
+.verify{margin-top:auto;display:flex;align-items:center;gap:16px;padding-top:46px;}
+.verify .qr{width:118px;height:118px;border:1px solid var(--ink);display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);}
+.verify .qr i{display:block;}
+.verify .vt .l{font-size:13px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--lgray);}
+.verify .vt .v{font-size:20px;color:var(--ink);margin-top:6px;letter-spacing:1px;}
+.foot{padding:34px 60px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.foot span{font-size:13px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--slate);}
+</style></head>
+<body>
+  <div class="card">
+    <div class="head">
+      <div class="wm">Museum Grades</div>
+      <div class="sub">Certificate of Authentication</div>
+    </div>
+    <div class="body">
+      <div class="title">Catalogued Piece</div>
+      <div class="bag">Chanel<br>Classic Flap, Medium</div>
+      <div class="spec">
+        <div class="r"><span class="l">Reference</span><span class="v">MG&middot;CH&middot;0421</span></div>
+        <div class="r"><span class="l">Material</span><span class="v">Caviar Leather</span></div>
+        <div class="r"><span class="l">Authentication</span><span class="v" style="color:var(--green);font-weight:600">Verified</span></div>
+        <div class="r"><span class="l">Condition Grade</span><span class="v grade"><span class="badge"></span><span class="v">Excellent</span></span></div>
+      </div>
+      <div class="verify">
+        <div class="qr">
+          <i style="background:var(--ink)"></i><i></i><i style="background:var(--ink)"></i><i style="background:var(--ink)"></i><i></i>
+          <i></i><i style="background:var(--ink)"></i><i></i><i></i><i style="background:var(--ink)"></i>
+          <i style="background:var(--ink)"></i><i></i><i style="background:var(--ink)"></i><i style="background:var(--ink)"></i><i></i>
+          <i></i><i></i><i style="background:var(--ink)"></i><i></i><i style="background:var(--ink)"></i>
+          <i style="background:var(--ink)"></i><i style="background:var(--ink)"></i><i></i><i style="background:var(--ink)"></i><i style="background:var(--ink)"></i>
+        </div>
+        <div class="vt"><div class="l">Verify online</div><div class="v">museumgrades.com/verify</div></div>
+      </div>
+    </div>
+    <div class="foot"><span>Curated &middot; Authenticated &middot; Catalogued</span><span>2026</span></div>
+  </div>
+</body></html>

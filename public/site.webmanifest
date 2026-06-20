@@ -1,0 +1,13 @@
+{
+  "name": "Museum Grades",
+  "short_name": "Museum Grades",
+  "description": "The world's finest pre-owned luxury handbags — curated, authenticated, and catalogued.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#191c1f",
+  "theme_color": "#191c1f",
+  "icons": [
+    { "src": "/icon-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Metropolis";src:url("file:///Users/macbookm1/Documents/museum-grades-commerce/public/fonts/Metropolis-Light.woff2") format("woff2");font-weight:200;}
+  @font-face{font-family:"Metropolis";src:url("file:///Users/macbookm1/Documents/museum-grades-commerce/public/fonts/Metropolis-Regular.woff2") format("woff2");font-weight:400;}
+  @font-face{font-family:"Metropolis";src:url("file:///Users/macbookm1/Documents/museum-grades-commerce/public/fonts/Metropolis-Medium.woff2") format("woff2");font-weight:500;}
+  @font-face{font-family:"Metropolis";src:url("file:///Users/macbookm1/Documents/museum-grades-commerce/public/fonts/Metropolis-SemiBold.woff2") format("woff2");font-weight:600;}
+  @font-face{font-family:"Metropolis";src:url("file:///Users/macbookm1/Documents/museum-grades-commerce/public/fonts/Metropolis-Bold.woff2") format("woff2");font-weight:700;}
+
+  :root{
+    --ink:rgb(25,28,31); --slate:rgb(89,89,89); --lgray:rgb(112,112,112);
+    --border:rgb(229,229,229); --blush:rgb(239,235,234); --green:rgb(0,128,0);
+    --paper:#fff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  @page{size:A4;margin:0;}
+  html,body{font-family:"Metropolis","Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--ink);-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+
+  .page{
+    position:relative;width:210mm;height:297mm;overflow:hidden;
+    page-break-after:always;background:var(--paper);
+    padding:24mm 22mm;
+  }
+  .page:last-child{page-break-after:auto;}
+
+  .eyebrow{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:4px;color:var(--lgray);}
+  .pagenum{position:absolute;bottom:16mm;right:22mm;font-size:9px;font-weight:600;letter-spacing:2px;color:var(--lgray);}
+  .footmark{position:absolute;bottom:16mm;left:22mm;font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ink);}
+  .rule{height:1px;background:var(--border);width:100%;}
+  .section-h{font-size:30px;font-weight:500;letter-spacing:-0.01em;line-height:1.1;}
+  .lead{font-size:13px;line-height:1.85;color:var(--slate);font-weight:400;}
+
+  /* ---------- COVER ---------- */
+  .cover{background:var(--ink);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:26mm 22mm;}
+  .cover .top{display:flex;justify-content:space-between;align-items:flex-start;}
+  .cover .eyebrow{color:rgba(255,255,255,0.55);}
+  .cover .wordmark{font-size:46px;font-weight:700;letter-spacing:8px;text-transform:uppercase;line-height:1.1;}
+  .cover .sub{font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.6);margin-top:10mm;text-transform:uppercase;font-weight:500;}
+  .cover .bigtitle{font-size:15px;font-weight:600;letter-spacing:6px;text-transform:uppercase;color:rgba(255,255,255,0.85);}
+  .cover .hairline{height:1px;background:rgba(255,255,255,0.25);width:100%;margin:8mm 0;}
+
+  /* ---------- CONTENT ---------- */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14mm;}
+  .stat{font-size:40px;font-weight:200;letter-spacing:-0.02em;}
+  .stat small{display:block;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--lgray);margin-top:6px;}
+
+  /* color swatches */
+  .swatches{display:grid;grid-template-columns:repeat(2,1fr);gap:7mm;margin-top:10mm;}
+  .sw{border:1px solid var(--border);}
+  .sw .chip{height:34mm;}
+  .sw .meta{padding:5mm;}
+  .sw .name{font-size:13px;font-weight:600;letter-spacing:0.5px;}
+  .sw .val{font-size:10px;color:var(--slate);margin-top:4px;letter-spacing:0.4px;font-weight:500;}
+  .sw .use{font-size:9.5px;color:var(--lgray);margin-top:7px;line-height:1.5;}
+
+  /* type specimen */
+  .specimen{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--border);padding:6mm 0;}
+  .specimen .w{font-size:34px;}
+  .specimen .lab{font-size:9.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--lgray);margin-left:auto;}
+  .scale-row{display:flex;align-items:baseline;gap:14px;padding:3.5mm 0;border-bottom:1px solid var(--border);}
+  .scale-row .px{width:64px;font-size:9.5px;font-weight:600;color:var(--lgray);letter-spacing:1px;}
+
+  /* logo block */
+  .logobox{border:1px solid var(--border);height:46mm;display:flex;align-items:center;justify-content:center;}
+  .logobox.dark{background:var(--ink);}
+  .lw{font-size:22px;font-weight:700;letter-spacing:6px;text-transform:uppercase;}
+  .clearspace{position:relative;border:1px dashed rgb(190,190,190);height:46mm;display:flex;align-items:center;justify-content:center;}
+
+  /* do / dont */
+  .dd{display:grid;grid-template-columns:1fr 1fr;gap:8mm;margin-top:8mm;}
+  .dd .h{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4mm;}
+  .dd .do .h{color:var(--green);}
+  .dd .dont .h{color:var(--ink);}
+  .dd li{font-size:11px;line-height:1.7;color:var(--slate);list-style:none;padding-left:14px;position:relative;margin-bottom:3mm;}
+  .dd li:before{position:absolute;left:0;top:0;font-weight:700;}
+  .dd .do li:before{content:"+";color:var(--green);}
+  .dd .dont li:before{content:"\00d7";color:var(--ink);}
+
+  /* buttons */
+  .btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 30px;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;}
+  .btn-fill{background:var(--ink);color:#fff;}
+  .btn-out{border:1px solid var(--ink);color:var(--ink);background:transparent;}
+  .label-pill{display:inline-flex;align-items:center;height:30px;padding:0 14px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;border:1px solid var(--ink);}
+
+  .voice-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8mm;margin-top:10mm;}
+  .voice-grid .vh{font-size:12px;font-weight:600;letter-spacing:1px;margin-bottom:3mm;}
+  .voice-grid p{font-size:10.5px;line-height:1.7;color:var(--slate);}
+
+  .quote{font-size:20px;font-weight:200;line-height:1.5;letter-spacing:-0.01em;color:var(--ink);}
+  .saywords{display:flex;flex-wrap:wrap;gap:3mm;margin-top:6mm;}
+  .saywords span{font-size:10px;letter-spacing:1px;border:1px solid var(--border);padding:6px 12px;color:var(--slate);text-transform:uppercase;font-weight:500;}
+
+  .mini-card{border:1px solid var(--border);}
+  .mini-card .img{height:30mm;background:rgb(245,245,245);display:flex;align-items:center;justify-content:center;color:rgb(200,200,200);font-size:9px;letter-spacing:2px;text-transform:uppercase;}
+  .mini-card .body{padding:4mm;}
+  .mini-card .br{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;}
+  .mini-card .nm{font-size:10px;color:var(--slate);margin-top:3px;}
+  .mini-card .pr{font-size:11px;font-weight:500;margin-top:6px;}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<section class="page cover">
+  <div class="top">
+    <span class="eyebrow">The Collector&apos;s Catalogue</span>
+    <span class="eyebrow">Brand Guidelines &middot; v1.0</span>
+  </div>
+  <div>
+    <div class="bigtitle">Brand Guidelines</div>
+    <div class="hairline"></div>
+    <div class="wordmark">Museum<br>Grades</div>
+    <div class="sub">The world&apos;s finest pre-owned luxury handbags</div>
+  </div>
+  <div class="top">
+    <span class="eyebrow">Curated &middot; Authenticated &middot; Catalogued</span>
+    <span class="eyebrow">2026</span>
+  </div>
+</section>
+
+<!-- ============ INTRO ============ -->
+<section class="page">
+  <span class="eyebrow">01 &mdash; The Brand</span>
+  <div style="height:14mm"></div>
+  <h1 class="section-h">A catalogue, not a clearance.<br>A standard, not a store.</h1>
+  <div style="height:12mm"></div>
+  <div class="grid2">
+    <p class="lead">Museum Grades presents the world&apos;s finest pre-owned luxury handbags as a curated catalogue &mdash; each piece authenticated, condition-graded, and documented with the rigour of an archive.</p>
+    <p class="lead">Our design language is deliberately quiet. Monochrome, generous in whitespace, and free of ornament, it lets the object speak. The interface recedes so the collection can lead.</p>
+  </div>
+  <div style="height:16mm"></div>
+  <div class="rule"></div>
+  <div style="height:10mm"></div>
+  <div class="grid2">
+    <div>
+      <div class="stat">Grade<small>Every piece condition-rated</small></div>
+    </div>
+    <div>
+      <div class="stat">Verify<small>Authenticated before listing</small></div>
+    </div>
+  </div>
+  <div style="height:10mm"></div>
+  <div class="grid2">
+    <p class="lead"><strong style="font-weight:600;color:var(--ink)">Mission.</strong> To give pre-owned luxury the catalogue it deserves &mdash; trustworthy, beautiful, and built for the discerning collector.</p>
+    <p class="lead"><strong style="font-weight:600;color:var(--ink)">Personality.</strong> Discreet. Exact. Confident without volume. We sound like a curator, never a salesperson.</p>
+  </div>
+  <span class="footmark">Museum Grades</span>
+  <span class="pagenum">02</span>
+</section>
+
+<!-- ============ LOGO ============ -->
+<section class="page">
+  <span class="eyebrow">02 &mdash; The Wordmark</span>
+  <div style="height:12mm"></div>
+  <h1 class="section-h">The Wordmark</h1>
+  <div style="height:4mm"></div>
+  <p class="lead" style="max-width:120mm">Museum Grades is a typographic identity. The wordmark is set in Metropolis Bold, uppercase, with a wide <strong style="color:var(--ink);font-weight:600">3&ndash;6px letter-spacing</strong>. There is no icon &mdash; the name, set with discipline, is the mark.</p>
+  <div style="height:10mm"></div>
+  <div class="grid2">
+    <div class="logobox"><span class="lw" style="color:var(--ink)">Museum Grades</span></div>
+    <div class="logobox dark"><span class="lw" style="color:#fff">Museum Grades</span></div>
+  </div>
+  <div style="height:6mm"></div>
+  <div class="grid2">
+    <span class="eyebrow">Primary &middot; Ink on Paper</span>
+    <span class="eyebrow">Reversed &middot; Paper on Ink</span>
+  </div>
+  <div style="height:12mm"></div>
+  <div class="grid2">
+    <div>
+      <span class="eyebrow">Clear Space</span>
+      <div style="height:4mm"></div>
+      <div class="clearspace"><span class="lw" style="font-size:16px;color:var(--ink)">Museum Grades</span></div>
+      <p class="lead" style="font-size:10.5px;margin-top:4mm">Keep clear space around the wordmark equal to the cap-height of the &ldquo;M&rdquo; on all sides.</p>
+    </div>
+    <div>
+      <span class="eyebrow">Minimum Size</span>
+      <div style="height:4mm"></div>
+      <div class="logobox"><span class="lw" style="font-size:11px;letter-spacing:3px">Museum Grades</span></div>
+      <p class="lead" style="font-size:10.5px;margin-top:4mm">Never reproduce below 90px wide on screen or 22mm in print to preserve legibility of the tracking.</p>
+    </div>
+  </div>
+  <div class="dd">
+    <div class="do"><div class="h">Always</div>
+      <ul><li>Use Ink or pure white only</li><li>Maintain the wide letter-spacing</li><li>Set in uppercase</li></ul>
+    </div>
+    <div class="dont"><div class="h">Never</div>
+      <ul><li>Add colour, gradients or shadows</li><li>Condense, stretch or tighten</li><li>Place on a busy image without overlay</li></ul>
+    </div>
+  </div>
+  <span class="footmark">Museum Grades</span>
+  <span class="pagenum">03</span>
+</section>
+
+<!-- ============ COLOR ============ -->
+<section class="page">
+  <span class="eyebrow">03 &mdash; Colour</span>
+  <div style="height:12mm"></div>
+  <h1 class="section-h">A monochrome palette</h1>
+  <div style="height:4mm"></div>
+  <p class="lead" style="max-width:120mm">The system is built on ink and paper. Greys carry hierarchy; two restrained accents &mdash; a soft blush and a verification green &mdash; appear only in functional moments. Colour is never decorative.</p>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:rgb(25,28,31)"></div><div class="meta"><div class="name">Ink</div><div class="val">RGB 25 28 31 &middot; #191C1F</div><div class="use">Primary text, wordmark, buttons, every dark surface.</div></div></div>
+    <div class="sw"><div class="chip" style="background:rgb(89,89,89)"></div><div class="meta"><div class="name">Slate</div><div class="val">RGB 89 89 89 &middot; #595959</div><div class="use">Body copy, secondary information.</div></div></div>
+    <div class="sw"><div class="chip" style="background:rgb(112,112,112)"></div><div class="meta"><div class="name">Light Gray</div><div class="val">RGB 112 112 112 &middot; #707070</div><div class="use">Eyebrows, captions, metadata.</div></div></div>
+    <div class="sw"><div class="chip" style="background:rgb(229,229,229)"></div><div class="meta"><div class="name">Border</div><div class="val">RGB 229 229 229 &middot; #E5E5E5</div><div class="use">Hairlines, dividers, card edges.</div></div></div>
+    <div class="sw"><div class="chip" style="background:rgb(239,235,234);border-bottom:1px solid var(--border)"></div><div class="meta"><div class="name">Blush <span style="font-weight:400;color:var(--lgray);font-size:9px">&mdash; accent</span></div><div class="val">RGB 239 235 234 &middot; #EFEBEA</div><div class="use">Notice bars, gentle emphasis only.</div></div></div>
+    <div class="sw"><div class="chip" style="background:rgb(0,128,0)"></div><div class="meta"><div class="name">Verified Green <span style="font-weight:400;color:var(--lgray);font-size:9px">&mdash; accent</span></div><div class="val">RGB 0 128 0 &middot; #008000</div><div class="use">Authentication &amp; trust signals only.</div></div></div>
+  </div>
+  <span class="footmark">Museum Grades</span>
+  <span class="pagenum">04</span>
+</section>
+
+<!-- ============ TYPOGRAPHY ============ -->
+<section class="page">
+  <span class="eyebrow">04 &mdash; Typography</span>
+  <div style="height:12mm"></div>
+  <h1 class="section-h">Metropolis</h1>
+  <div style="height:4mm"></div>
+  <p class="lead" style="max-width:120mm">One typeface carries the entire system. Metropolis &mdash; a geometric sans &mdash; is clean, modern and quietly confident. Helvetica Neue is the system fallback.</p>
+  <div style="height:8mm"></div>
+  <div class="specimen"><span class="w" style="font-weight:200">Aa</span><span style="font-size:13px;color:var(--slate)">Metropolis Light</span><span class="lab">200</span></div>
+  <div class="specimen"><span class="w" style="font-weight:400">Aa</span><span style="font-size:13px;color:var(--slate)">Metropolis Regular</span><span class="lab">400</span></div>
+  <div class="specimen"><span class="w" style="font-weight:500">Aa</span><span style="font-size:13px;color:var(--slate)">Metropolis Medium</span><span class="lab">500</span></div>
+  <div class="specimen"><span class="w" style="font-weight:600">Aa</span><span style="font-size:13px;color:var(--slate)">Metropolis SemiBold</span><span class="lab">600</span></div>
+  <div class="specimen"><span class="w" style="font-weight:700">Aa</span><span style="font-size:13px;color:var(--slate)">Metropolis Bold</span><span class="lab">700</span></div>
+  <div style="height:10mm"></div>
+  <span class="eyebrow">Type Scale</span>
+  <div style="height:4mm"></div>
+  <div class="scale-row"><span class="px">56 / 200</span><span style="font-size:30px;font-weight:200;letter-spacing:-0.02em">Display</span></div>
+  <div class="scale-row"><span class="px">36 / 500</span><span style="font-size:24px;font-weight:500;letter-spacing:-0.01em">Page Heading</span></div>
+  <div class="scale-row"><span class="px">24 / 500</span><span style="font-size:18px;font-weight:500">Section Title</span></div>
+  <div class="scale-row"><span class="px">16 / 400</span><span style="font-size:14px;font-weight:400;color:var(--slate)">Body copy &mdash; calm, readable, 1.7&ndash;1.85 line-height.</span></div>
+  <div class="scale-row"><span class="px">11 / 600</span><span style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--lgray)">Eyebrow Label</span></div>
+  <span class="footmark">Museum Grades</span>
+  <span class="pagenum">05</span>
+</section>
+
+<!-- ============ UI / COMPONENTS ============ -->
+<section class="page">
+  <span class="eyebrow">05 &mdash; Interface</span>
+  <div style="height:12mm"></div>
+  <h1 class="section-h">Components &amp; rules</h1>
+  <div style="height:4mm"></div>
+  <p class="lead" style="max-width:120mm">Square corners, hairline borders, and uppercase tracked labels define every surface. Nothing is rounded; nothing floats. Structure is honest and rectilinear.</p>
+  <div style="height:10mm"></div>
+  <span class="eyebrow">Buttons</span>
+  <div style="height:5mm"></div>
+  <div style="display:flex;gap:8mm;align-items:center">
+    <span class="btn btn-fill">Proceed to Checkout</span>
+    <span class="btn btn-out">View the Collection</span>
+    <span class="label-pill">In Your Bag</span>
+  </div>
+  <div style="height:12mm"></div>
+  <span class="eyebrow">Product Card Anatomy</span>
+  <div style="height:5mm"></div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8mm;max-width:140mm">
+    <div class="mini-card"><div class="img">Image 1:1</div><div class="body"><div class="br">Chanel</div><div class="nm">Classic Flap Medium</div><div class="pr">$8,400</div></div></div>
+    <div class="mini-card"><div class="img">Image 1:1</div><div class="body"><div class="br">Herm&egrave;s</div><div class="nm">Birkin 30 Togo</div><div class="pr">$22,000</div></div></div>
+    <div class="mini-card"><div class="img">Image 1:1</div><div class="body"><div class="br">Louis Vuitton</div><div class="nm">Neverfull MM</div><div class="pr">$1,650</div></div></div>
+  </div>
+  <div style="height:12mm"></div>
+  <div class="grid2">
+    <div>
+      <span class="eyebrow">Notice Bar</span>
+      <div style="height:4mm"></div>
+      <div style="background:var(--blush);height:30px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--slate)">Items in bag aren&apos;t reserved &mdash; check out to make them yours.</div>
+    </div>
+    <div>
+      <span class="eyebrow">Trust Signal</span>
+      <div style="height:4mm"></div>
+      <div style="display:flex;align-items:center;gap:8px;height:30px;font-size:11px;color:var(--slate)"><span style="display:inline-block;width:13px;height:13px;border:2px solid var(--green);position:relative"></span>Every piece authenticated &amp; graded.</div>
+    </div>
+  </div>
+  <span class="footmark">Museum Grades</span>
+  <span class="pagenum">06</span>
+</section>
+
+<!-- ============ VOICE ============ -->
+<section class="page">
+  <span class="eyebrow">06 &mdash; Voice &amp; Tone</span>
+  <div style="height:12mm"></div>
+  <h1 class="section-h">How we sound</h1>
+  <div style="height:10mm"></div>
+  <p class="quote">&ldquo;The world&apos;s finest pre-owned luxury handbags &mdash; curated, authenticated, and catalogued.&rdquo;</p>
+  <div class="voice-grid">
+    <div><div class="vh">Curatorial</div><p>We describe, we don&apos;t sell. Precise nouns over adjectives. Let the object earn the admiration.</p></div>
+    <div><div class="vh">Exact</div><p>Specific and verifiable. Conditions are graded, not gushed about. Trust is built on accuracy.</p></div>
+    <div><div class="vh">Quiet</div><p>No exclamation, no hype, no urgency tricks. Confidence speaks at a measured volume.</p></div>
+  </div>
+  <div style="height:12mm"></div>
+  <div class="grid2">
+    <div>
+      <span class="eyebrow" style="color:var(--green)">Words we use</span>
+      <div class="saywords">
+        <span>Curated</span><span>Authenticated</span><span>Graded</span><span>Acquisition</span><span>Catalogue</span><span>Collector</span><span>Provenance</span><span>Considered</span>
+      </div>
+    </div>
+    <div>
+      <span class="eyebrow">Words we avoid</span>
+      <div class="saywords">
+        <span>Cheap</span><span>Deal</span><span>Hurry</span><span>Sale!!!</span><span>Must-have</span><span>Insane</span><span>Limited time</span>
+      </div>
+    </div>
+  </div>
+  <div style="height:14mm"></div>
+  <div class="rule"></div>
+  <div style="height:8mm"></div>
+  <div class="grid2">
+    <p class="lead"><strong style="color:var(--ink);font-weight:600">Say:</strong> &ldquo;Featured Acquisitions.&rdquo; &nbsp; &ldquo;Authenticated before listing.&rdquo; &nbsp; &ldquo;Condition: Excellent.&rdquo;</p>
+    <p class="lead"><strong style="color:var(--ink);font-weight:600">Not:</strong> &ldquo;Hot deals!&rdquo; &nbsp; &ldquo;Grab it before it&apos;s gone!&rdquo; &nbsp; &ldquo;Unbeatable prices!&rdquo;</p>
+  </div>
+  <span class="footmark">Museum Grades</span>
+  <span class="pagenum">07</span>
+</section>
+
+<!-- ============ APPLICATIONS ============ -->
+<section class="page">
+  <span class="eyebrow">07 &mdash; Applications</span>
+  <div style="height:12mm"></div>
+  <h1 class="section-h">In the world</h1>
+  <div style="height:4mm"></div>
+  <p class="lead" style="max-width:120mm">The identity extends across print, packaging, social and email with the same restraint. A sample suite of collateral accompanies these guidelines as production-ready artwork.</p>
+  <div style="height:12mm"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10mm">
+    <div style="background:var(--ink);height:42mm;display:flex;flex-direction:column;justify-content:space-between;padding:7mm;color:#fff">
+      <span style="font-size:8px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.5)">Business Card</span>
+      <span style="font-size:16px;font-weight:700;letter-spacing:4px;text-transform:uppercase">Museum Grades</span>
+    </div>
+    <div style="border:1px solid var(--border);height:42mm;display:flex;flex-direction:column;justify-content:space-between;padding:7mm">
+      <span style="font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--lgray)">Social &middot; 1:1</span>
+      <span style="font-size:15px;font-weight:500">Featured Acquisition</span>
+    </div>
+    <div style="border:1px solid var(--border);height:42mm;display:flex;flex-direction:column;justify-content:space-between;padding:7mm">
+      <span style="font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--lgray)">Authentication Card</span>
+      <span style="font-size:15px;font-weight:500">Condition &middot; Graded</span>
+    </div>
+    <div style="background:var(--blush);height:42mm;display:flex;flex-direction:column;justify-content:space-between;padding:7mm">
+      <span style="font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--lgray)">Email Banner</span>
+      <span style="font-size:15px;font-weight:500;color:var(--ink)">The Collector&apos;s Catalogue</span>
+    </div>
+  </div>
+  <div style="height:14mm"></div>
+  <p class="lead" style="font-size:11px;color:var(--lgray)">Collateral supplied as PNG: business card, social post, authentication / grading card, email banner, and tote.</p>
+  <span class="footmark">Museum Grades</span>
+  <span class="pagenum">08</span>
+</section>
+
+<!-- ============ BACK ============ -->
+<section class="page cover" style="justify-content:center;align-items:center;text-align:center">
+  <div>
+    <div class="wordmark" style="font-size:30px">Museum Grades</div>
+    <div class="hairline" style="margin:8mm auto;width:40mm"></div>
+    <div class="sub" style="margin-top:0">Curated &middot; Authenticated &middot; Catalogued</div>
+    <div style="height:18mm"></div>
+    <div class="eyebrow" style="color:rgba(255,255,255,.5)">museumgrades.com &middot; Brand Guidelines v1.0 &middot; 2026</div>
+  </div>
+</section>
+
+</body>
+</html>

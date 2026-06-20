@@ -187,3 +187,61 @@ export const cartItemsRelations = relations(cartItems, ({ one }) => ({
     references: [products.id],
   }),
 }));
+
+// ─── Orders ───────────────────────────────────────────────────────────────────
+
+export const orders = pgTable(
+  "orders",
+  {
+    id: text("id").primaryKey(), // Square payment ID
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    status: text("status").notNull().default("completed"), // completed | refunded
+    subtotalAmount: integer("subtotal_amount").notNull(), // cents
+    totalAmount: integer("total_amount").notNull(),       // cents
+    currency: text("currency").notNull().default("USD"),
+    squarePaymentId: text("square_payment_id").notNull().unique(),
+    squareReceiptUrl: text("square_receipt_url"),
+    // Per-order shipping snapshot (nullable — legacy orders predate this).
+    shippingName: text("shipping_name"),
+    shippingPhone: text("shipping_phone"),
+    shippingLine1: text("shipping_line1"),
+    shippingLine2: text("shipping_line2"),
+    shippingCity: text("shipping_city"),
+    shippingState: text("shipping_state"),
+    shippingPostalCode: text("shipping_postal_code"),
+    shippingCountry: text("shipping_country"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("orders_user_id_idx").on(t.userId)]
+);
+
+export const orderItems = pgTable(
+  "order_items",
+  {
+    id: serial("id").primaryKey(),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    productId: text("product_id").notNull(), // kept for reference; product may be sold
+    name: text("name").notNull(),
+    brand: text("brand").notNull(),
+    price: integer("price").notNull(), // cents — snapshot at purchase time
+    imageUrl: text("image_url"),
+    condition: text("condition").notNull(),
+    slug: text("slug").notNull(),
+  },
+  (t) => [index("order_items_order_id_idx").on(t.orderId)]
+);
+
+export const ordersRelations = relations(orders, ({ one, many }) => ({
+  user: one(user, { fields: [orders.userId], references: [user.id] }),
+  items: many(orderItems),
+}));
+
+export const orderItemsRelations = relations(orderItems, ({ one }) => ({
+  order: one(orders, { fields: [orderItems.orderId], references: [orders.id] }),
+}));

@@ -1,0 +1,37 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_fonts.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Metropolis","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+:root{--ink:rgb(25,28,31);--slate:rgb(89,89,89);--lgray:rgb(112,112,112);--border:rgb(229,229,229);}
+body{width:2160px;height:600px;background:rgb(244,244,244);display:flex;align-items:center;justify-content:center;gap:60px;}
+.card{width:1050px;height:600px;position:relative;overflow:hidden;}
+/* FRONT */
+.front{background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.front .eyebrow{font-size:18px;font-weight:600;letter-spacing:7px;text-transform:uppercase;color:rgba(255,255,255,.5);}
+.front .wm{font-size:62px;font-weight:700;letter-spacing:14px;text-transform:uppercase;color:#fff;margin-top:34px;}
+.front .rule{width:90px;height:1px;background:rgba(255,255,255,.35);margin:34px 0;}
+.front .tag{font-size:16px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.55);}
+/* BACK */
+.back{background:#fff;border:1px solid var(--border);padding:70px;display:flex;flex-direction:column;justify-content:space-between;}
+.back .wm{font-size:30px;font-weight:700;letter-spacing:7px;text-transform:uppercase;color:var(--ink);}
+.back .rows{display:flex;flex-direction:column;gap:22px;}
+.back .row .l{font-size:13px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--lgray);}
+.back .row .v{font-size:24px;font-weight:400;color:var(--ink);margin-top:6px;}
+.back .foot{font-size:14px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--slate);}
+</style></head>
+<body>
+  <div class="card front">
+    <div class="eyebrow">The Collector&apos;s Catalogue</div>
+    <div class="wm">Museum&nbsp;Grades</div>
+    <div class="rule"></div>
+    <div class="tag">Curated &middot; Authenticated &middot; Catalogued</div>
+  </div>
+  <div class="card back">
+    <div class="wm">Museum Grades</div>
+    <div class="rows">
+      <div class="row"><div class="l">Web</div><div class="v">museumgrades.com</div></div>
+      <div class="row"><div class="l">Enquiries</div><div class="v">hello@museumgrades.com</div></div>
+    </div>
+    <div class="foot">The world&apos;s finest pre-owned luxury</div>
+  </div>
+</body></html>

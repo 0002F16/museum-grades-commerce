@@ -83,6 +83,12 @@ export default function SignInPage() {
           </button>
         </form>
 
+        <p className="mt-5 text-center text-[13px]">
+          <Link href="/forgot-password" className="underline" style={{ color: "rgba(25,28,31,0.6)" }}>
+            Forgot password?
+          </Link>
+        </p>
+
         <p className="mt-8 text-center text-[13px]" style={{ color: "rgba(25,28,31,0.6)" }}>
           No account?{" "}
           <Link href="/sign-up" className="font-medium underline" style={{ color: "rgb(25,28,31)" }}>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="rgb(25,28,31)"/>
+  <line x1="72" y1="54" x2="440" y2="54" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>
+  <line x1="72" y1="458" x2="440" y2="458" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>
+  <text x="256" y="370" text-anchor="middle"
+    font-family="Metropolis, Helvetica Neue, Arial, sans-serif"
+    font-weight="700" font-size="268"
+    letter-spacing="-6" fill="#ffffff">M</text>
+</svg>

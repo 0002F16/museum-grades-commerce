@@ -22,6 +22,20 @@
       "when": 1780157864468,
       "tag": "0002_red_puppet_master",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1780658224984,
+      "tag": "0003_brief_maria_hill",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1781533125663,
+      "tag": "0004_fancy_doorman",
+      "breakpoints": true
     }
   ]
 }

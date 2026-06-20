@@ -8,12 +8,11 @@ interface AddToCartButtonProps {
 }
 
 export function AddToCartButton({ item }: AddToCartButtonProps) {
-  const { items, addItem, openCart } = useCart();
+  const { items, addItem } = useCart();
   const inCart = items.some((i) => i.id === item.id);
 
   function handleClick() {
     if (!inCart) addItem(item);
-    openCart();
   }
 
   return (

@@ -1,0 +1,31 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_fonts.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Metropolis","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+:root{--ink:rgb(25,28,31);--lgray:rgb(112,112,112);}
+body{width:1080px;height:1080px;background:rgb(238,236,234);display:flex;align-items:center;justify-content:center;}
+.tote{width:660px;height:720px;background:rgb(247,245,243);position:relative;box-shadow:none;}
+/* canvas texture edges via inner border */
+.tote:after{content:"";position:absolute;inset:0;border:1px solid rgba(25,28,31,.08);}
+/* handles */
+.handle{position:absolute;top:-150px;width:24px;height:300px;border:24px solid var(--ink);border-bottom:none;border-radius:140px 140px 0 0;background:transparent;box-sizing:border-box;}
+.handle.l{left:150px;width:150px;}
+.handle.r{right:150px;width:150px;}
+.print{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;padding:0 60px;}
+.print .wm{font-size:42px;font-weight:700;letter-spacing:11px;text-transform:uppercase;color:var(--ink);}
+.print .rule{width:70px;height:1px;background:rgba(25,28,31,.4);margin:26px auto;}
+.print .tag{font-size:15px;font-weight:600;letter-spacing:5px;text-transform:uppercase;color:var(--lgray);}
+.caption{position:absolute;bottom:60px;left:0;right:0;text-align:center;font-size:14px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:rgba(25,28,31,.45);}
+</style></head>
+<body>
+  <div class="tote">
+    <div class="handle l"></div>
+    <div class="handle r"></div>
+    <div class="print">
+      <div class="wm">Museum<br>Grades</div>
+      <div class="rule"></div>
+      <div class="tag">The Collector&apos;s Catalogue</div>
+    </div>
+  </div>
+  <div class="caption">Cotton Tote &middot; Packaging</div>
+</body></html>

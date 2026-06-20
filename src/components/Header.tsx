@@ -19,7 +19,7 @@ export function Header() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { data: session } = useSession();
-  const { count, openCart } = useCart();
+  const { count } = useCart();
 
   // Focus the input whenever the search bar opens
   useEffect(() => {
@@ -136,26 +136,15 @@ export function Header() {
             </form>
           ) : (
             <>
-              {session ? (
-                <Link href="/account" aria-label="My account">
-                  <User className="size-5" style={{ color: "rgb(25,28,31)" }} />
-                </Link>
-              ) : (
-                <Link
-                  href="/sign-in"
-                  className="text-[12px] font-semibold uppercase tracking-[1.5px] transition-colors hover:opacity-70"
-                  style={{ color: "rgb(25,28,31)" }}
-                >
-                  Sign In
-                </Link>
-              )}
-              {/* Cart */}
-              <button
-                type="button"
-                aria-label="Open bag"
-                onClick={openCart}
-                className="relative"
+              <Link
+                href={session ? "/account" : "/sign-in"}
+                aria-label={session ? "My account" : "Sign in"}
+                className="transition-transform hover:scale-110"
               >
+                <User className="size-5" style={{ color: "rgb(25,28,31)" }} />
+              </Link>
+              {/* Cart */}
+              <Link href="/cart" aria-label="View bag" className="relative transition-transform hover:scale-110">
                 <ShoppingBag className="size-6" style={{ color: "rgb(25, 28, 31)" }} />
                 {count > 0 && (
                   <span
@@ -165,12 +154,13 @@ export function Header() {
                     {count > 9 ? "9+" : count}
                   </span>
                 )}
-              </button>
+              </Link>
 
               <button
                 type="button"
                 aria-label="Open search"
                 onClick={openSearch}
+                className="transition-transform hover:scale-110"
               >
                 <Search className="size-6" style={{ color: "rgb(25, 28, 31)" }} />
               </button>

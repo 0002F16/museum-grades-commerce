@@ -1,9 +1,23 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Quick cookie check — the account page also does a full server-side session
-// verify via auth.api.getSession before rendering any data.
+// Edge runtime: cheap cookie-presence checks only. Full verification happens
+// server-side — the account page via auth.api.getSession, and the admin layout
+// via verifyAdmin() (HMAC). Never trust these presence checks alone.
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // ── Admin gate ── (login page stays public so it can render)
+  if (pathname.startsWith("/admin")) {
+    if (pathname === "/admin/login") return NextResponse.next();
+    const adminCookie = request.cookies.get("mg_admin");
+    if (!adminCookie) {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // ── Account gate ──
   const sessionCookie =
     request.cookies.get("better-auth.session_token") ??
     request.cookies.get("__Secure-better-auth.session_token");
@@ -18,5 +32,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/account/:path*"],
+  matcher: ["/account/:path*", "/admin/:path*"],
 };

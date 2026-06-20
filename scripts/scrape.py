@@ -7,17 +7,17 @@ Note:  Komehyo's English site (en.komehyo.com) no longer resolves (DNS dead).
 Output: scripts/scraped-products.json  (120 products, 20 per brand)
 Brands: Chanel, Louis Vuitton, Gucci, Prada, Hermès, Saint Laurent
 
-Condition mapping (Rebag → site grades)
+Condition mapping (Rebag → Museum Grades site grades)
 ────────────────────────────────────────
   New            → New
-  Never Carried  → Pristine
-  Pristine       → Pristine
+  Never Carried  → New
+  Pristine       → New
   Excellent      → Excellent
-  Great          → Very Good
-  Very good      → Very Good
-  Good           → Good
+  Great          → Excellent
+  Very good      → Excellent
+  Good           → Shows Wear
   Fair           → Fair
-  Outlet         → Good  (discounted outlet pieces)
+  Outlet         → Shows Wear  (discounted outlet pieces)
 """
 
 import ssl
@@ -166,20 +166,22 @@ def map_condition(grade: str) -> str:
     if g in ("new",):
         return "New"
     if g in ("never carried",):
-        return "Pristine"
+        return "New"
     if g in ("pristine",):
-        return "Pristine"
+        return "New"
     if g in ("excellent",):
         return "Excellent"
     if g in ("great",):
-        return "Very Good"
+        return "Excellent"
     if g in ("very good",):
-        return "Very Good"
+        return "Excellent"
     if g in ("good",):
-        return "Good"
-    if g in ("fair", "outlet"):
+        return "Shows Wear"
+    if g in ("fair",):
         return "Fair"
-    return "Good"
+    if g in ("outlet",):
+        return "Shows Wear"
+    return "Shows Wear"
 
 
 def parse_measurements(raw: str) -> dict:
