@@ -1,15 +1,35 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { and, asc, desc, eq, gte, lte, ilike, or, sql, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { brands, categories, products, productImages } from "@/db/schema";
 import type {
   Product,
   ProductFilters,
+  PriceRange,
   FilterGroup,
   CategoryItem,
+  FacetKey,
 } from "@/types/product";
 
 export type { CategoryItem } from "@/types/product";
+
+// ─── Price tiers (single source of truth for facet + filtering) ──────────────
+// `max` is the exclusive upper bound; ranges are non-overlapping.
+export const PRICE_TIERS: { label: string; min: number; max?: number }[] = [
+  { label: "Under $500", min: 0, max: 500 },
+  { label: "$500 – $1,000", min: 500, max: 1000 },
+  { label: "$1,000 – $2,500", min: 1000, max: 2500 },
+  { label: "$2,500 – $5,000", min: 2500, max: 5000 },
+  { label: "Over $5,000", min: 5000 },
+];
+
+/** Convert a price-tier label into a queryable {min, max} (max inclusive). */
+export function priceTierToRange(label: string): PriceRange | undefined {
+  const tier = PRICE_TIERS.find((t) => t.label === label);
+  if (!tier) return undefined;
+  return { min: tier.min, max: tier.max !== undefined ? tier.max - 1 : undefined };
+}
 
 // ─── row → Product adapter ──────────────────────────────────────────────────
 
@@ -65,7 +85,18 @@ async function imagesByProduct(
   return map;
 }
 
-function buildWhere(filters: ProductFilters) {
+function priceRangeCond(r: PriceRange) {
+  const parts = [gte(products.price, r.min)];
+  if (r.max !== undefined) parts.push(lte(products.price, r.max));
+  return parts.length > 1 ? and(...parts) : parts[0];
+}
+
+/**
+ * Build SQL conditions for a filter set. `exclude` omits one facet dimension —
+ * used for contextual facet counts (a facet's options are counted against every
+ * OTHER active filter, not its own).
+ */
+function buildConds(filters: ProductFilters, exclude?: FacetKey) {
   const conds = [];
   if (filters.query) {
     const like = `%${filters.query}%`;
@@ -80,15 +111,23 @@ function buildWhere(filters: ProductFilters) {
       )
     );
   }
-  if (filters.brand) conds.push(eq(brands.name, filters.brand));
-  if (filters.condition) conds.push(eq(products.condition, filters.condition));
-  if (filters.color) conds.push(eq(products.color, filters.color));
-  if (filters.material) conds.push(eq(products.material, filters.material));
-  if (filters.bagType) conds.push(eq(categories.name, filters.bagType));
-  if (filters.priceMin !== undefined)
-    conds.push(gte(products.price, filters.priceMin));
-  if (filters.priceMax !== undefined)
-    conds.push(lte(products.price, filters.priceMax));
+  if (exclude !== "brand" && filters.brand?.length)
+    conds.push(inArray(brands.name, filters.brand));
+  if (exclude !== "condition" && filters.condition?.length)
+    conds.push(inArray(products.condition, filters.condition));
+  if (exclude !== "color" && filters.color?.length)
+    conds.push(inArray(products.color, filters.color));
+  if (exclude !== "material" && filters.material?.length)
+    conds.push(inArray(products.material, filters.material));
+  if (exclude !== "bagType" && filters.bagType?.length)
+    conds.push(inArray(categories.name, filters.bagType));
+  if (exclude !== "price" && filters.priceRanges?.length)
+    conds.push(or(...filters.priceRanges.map(priceRangeCond)));
+  return conds;
+}
+
+function buildWhere(filters: ProductFilters, exclude?: FacetKey) {
+  const conds = buildConds(filters, exclude);
   return conds.length > 0 ? and(...conds) : undefined;
 }
 
@@ -130,7 +169,9 @@ export async function getProducts(
     const where = buildWhere(filters);
 
     const orderBy =
-      filters.sort === "price-asc"
+      filters.sort === "random"
+        ? sql`random()`
+        : filters.sort === "price-asc"
         ? asc(products.price)
         : filters.sort === "price-desc"
           ? desc(products.price)
@@ -199,7 +240,7 @@ export async function getAllProducts(): Promise<Product[]> {
   }
 }
 
-export async function getCategories(): Promise<CategoryItem[]> {
+async function _getCategories(): Promise<CategoryItem[]> {
   try {
     const rows = await db
       .select({
@@ -235,7 +276,7 @@ export async function getCategories(): Promise<CategoryItem[]> {
   }
 }
 
-export async function getFacets(): Promise<FilterGroup[]> {
+async function _getFacets(): Promise<FilterGroup[]> {
   try {
     async function countByColumn(
       column: typeof products.color | typeof products.condition | typeof products.material
@@ -262,16 +303,8 @@ export async function getFacets(): Promise<FilterGroup[]> {
       .groupBy(categories.name)
       .orderBy(desc(sql`count(${products.id})`));
 
-    const priceTiers: { label: string; min: number; max?: number }[] = [
-      { label: "Under $500", min: 0, max: 500 },
-      { label: "$500 – $1,000", min: 500, max: 1000 },
-      { label: "$1,000 – $2,500", min: 1000, max: 2500 },
-      { label: "$2,500 – $5,000", min: 2500, max: 5000 },
-      { label: "Over $5,000", min: 5000 },
-    ];
-
     const priceOptions: FilterGroup["options"] = [];
-    for (const { label, min, max } of priceTiers) {
+    for (const { label, min, max } of PRICE_TIERS) {
       const cond = max !== undefined
         ? and(gte(products.price, min), lte(products.price, max - 1))
         : gte(products.price, min);
@@ -302,5 +335,78 @@ export async function getFacets(): Promise<FilterGroup[]> {
   } catch (err) {
     console.error("getFacets failed:", err);
     return [];
+  }
+}
+
+// Categories and the facet structure (option universe + ordering) are static
+// across filter changes — cache them so only getProducts/getFacetCounts re-run.
+export const getCategories = unstable_cache(_getCategories, ["categories"], {
+  revalidate: 300,
+});
+export const getFacets = unstable_cache(_getFacets, ["facets"], {
+  revalidate: 300,
+});
+
+/**
+ * Contextual facet counts for the current filter set: each dimension is counted
+ * against every OTHER active filter. Returns FilterGroup-name → label → count.
+ * Computed per request (cheap GROUP BYs) — not cached.
+ */
+export async function getFacetCounts(
+  filters: ProductFilters
+): Promise<Record<string, Record<string, number>>> {
+  try {
+    async function countBy(
+      labelCol: typeof brands.name | typeof products.condition | typeof products.color | typeof products.material | typeof categories.name,
+      exclude: FacetKey
+    ): Promise<Record<string, number>> {
+      const rows = await db
+        .select({ label: labelCol, count: sql<number>`count(*)::int` })
+        .from(products)
+        .innerJoin(brands, eq(products.brandId, brands.id))
+        .innerJoin(categories, eq(products.categoryId, categories.id))
+        .where(buildWhere(filters, exclude))
+        .groupBy(labelCol);
+      const m: Record<string, number> = {};
+      for (const r of rows) m[r.label as string] = r.count;
+      return m;
+    }
+
+    const [brand, condition, bagType, color, material] = await Promise.all([
+      countBy(brands.name, "brand"),
+      countBy(products.condition, "condition"),
+      countBy(categories.name, "bagType"),
+      countBy(products.color, "color"),
+      countBy(products.material, "material"),
+    ]);
+
+    // Price tiers: count each tier alongside the non-price filters.
+    const priceWhere = buildConds(filters, "price");
+    const price: Record<string, number> = {};
+    for (const { label, min, max } of PRICE_TIERS) {
+      const tierCond =
+        max !== undefined
+          ? and(gte(products.price, min), lte(products.price, max - 1))
+          : gte(products.price, min);
+      const [{ count }] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(products)
+        .innerJoin(brands, eq(products.brandId, brands.id))
+        .innerJoin(categories, eq(products.categoryId, categories.id))
+        .where(priceWhere.length > 0 ? and(...priceWhere, tierCond) : tierCond);
+      price[label] = count;
+    }
+
+    return {
+      Designers: brand,
+      Condition: condition,
+      "Bag Type": bagType,
+      Price: price,
+      Color: color,
+      Material: material,
+    };
+  } catch (err) {
+    console.error("getFacetCounts failed:", err);
+    return {};
   }
 }

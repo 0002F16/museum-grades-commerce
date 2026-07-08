@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { useSession } from "@/lib/auth-client";
+import { useToast } from "@/context/ToastContext";
 import {
   getCartAction,
   addCartAction,
@@ -24,26 +25,20 @@ export type { CartItem } from "@/types/cart";
 
 interface CartState {
   items: CartItem[];
-  isOpen: boolean;
 }
 
 type CartAction =
   | { type: "ADD_ITEM"; item: CartItem }
   | { type: "REMOVE_ITEM"; id: string }
   | { type: "CLEAR" }
-  | { type: "OPEN" }
-  | { type: "CLOSE" }
   | { type: "HYDRATE"; items: CartItem[] };
 
 interface CartContextValue {
   items: CartItem[];
   count: number;
-  isOpen: boolean;
   addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;
-  openCart: () => void;
-  closeCart: () => void;
 }
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
@@ -58,10 +53,6 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return { ...state, items: state.items.filter((i) => i.id !== action.id) };
     case "CLEAR":
       return { ...state, items: [] };
-    case "OPEN":
-      return { ...state, isOpen: true };
-    case "CLOSE":
-      return { ...state, isOpen: false };
     case "HYDRATE":
       return { ...state, items: action.items };
     default:
@@ -84,8 +75,9 @@ function readGuestCart(): CartItem[] {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(cartReducer, { items: [], isOpen: false });
+  const [state, dispatch] = useReducer(cartReducer, { items: [] });
   const { data: session, isPending } = useSession();
+  const { show } = useToast();
   const userId = session?.user?.id ?? null;
 
   // Tracks which auth identity the in-memory cart is currently synced to.
@@ -138,24 +130,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [state.items, userId]);
 
-  // ── Lock body scroll when drawer is open ────────────────────────────────────
-  useEffect(() => {
-    document.body.style.overflow = state.isOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [state.isOpen]);
-
   // ── Mutations: optimistic local update + DB write when logged in ────────────
   function addItem(item: CartItem) {
     if (state.items.some((i) => i.id === item.id)) return;
     dispatch({ type: "ADD_ITEM", item });
     if (userId) void addCartAction(item.id);
+    show("Added to bag", { label: "View bag", href: "/cart" });
   }
 
   function removeItem(id: string) {
     dispatch({ type: "REMOVE_ITEM", id });
     if (userId) void removeCartAction(id);
+    show("Removed from bag");
   }
 
   function clearCart() {
@@ -168,12 +154,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       value={{
         items: state.items,
         count: state.items.length,
-        isOpen: state.isOpen,
         addItem,
         removeItem,
         clearCart,
-        openCart: () => dispatch({ type: "OPEN" }),
-        closeCart: () => dispatch({ type: "CLOSE" }),
       }}
     >
       {children}

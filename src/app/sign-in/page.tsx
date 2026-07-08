@@ -1,12 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "@/lib/auth-client";
 
+// Only same-origin relative paths are honored, to avoid open-redirects.
+function safeReturnTo(value: string | null): string {
+  if (value && value.startsWith("/") && !value.startsWith("//")) return value;
+  return "/account";
+}
+
 export default function SignInPage() {
+  return (
+    <Suspense>
+      <SignInForm />
+    </Suspense>
+  );
+}
+
+function SignInForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = safeReturnTo(searchParams.get("returnTo"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,7 +37,7 @@ export default function SignInPage() {
     if (err) {
       setError(err.message ?? "Invalid email or password.");
     } else {
-      router.push("/account");
+      router.push(returnTo);
       router.refresh();
     }
   }
@@ -91,7 +107,11 @@ export default function SignInPage() {
 
         <p className="mt-8 text-center text-[13px]" style={{ color: "rgba(25,28,31,0.6)" }}>
           No account?{" "}
-          <Link href="/sign-up" className="font-medium underline" style={{ color: "rgb(25,28,31)" }}>
+          <Link
+            href={returnTo === "/account" ? "/sign-up" : `/sign-up?returnTo=${encodeURIComponent(returnTo)}`}
+            className="font-medium underline"
+            style={{ color: "rgb(25,28,31)" }}
+          >
             Create one
           </Link>
         </p>

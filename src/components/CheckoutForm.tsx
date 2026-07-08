@@ -59,9 +59,14 @@ export function CheckoutForm({ items, appId, locationId, defaultName }: Props) {
     postalCode: "",
     country: "United States",
   });
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<keyof ShippingAddress, string>>
+  >({});
 
   function setField(key: keyof ShippingAddress, value: string) {
     setShipping((s) => ({ ...s, [key]: value }));
+    // Clear this field's error as the user corrects it.
+    setFieldErrors((e) => (e[key] ? { ...e, [key]: undefined } : e));
   }
 
   const subtotal = items.reduce((s, i) => s + i.price, 0);
@@ -90,7 +95,7 @@ export function CheckoutForm({ items, appId, locationId, defaultName }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sdkReady]);
 
-  function validateShipping(): string | null {
+  function validateShipping(): Partial<Record<keyof ShippingAddress, string>> {
     const required: [keyof ShippingAddress, string][] = [
       ["name", "Full name"],
       ["line1", "Address"],
@@ -99,19 +104,21 @@ export function CheckoutForm({ items, appId, locationId, defaultName }: Props) {
       ["postalCode", "Postal code"],
       ["country", "Country"],
     ];
+    const errors: Partial<Record<keyof ShippingAddress, string>> = {};
     for (const [key, label] of required) {
-      if (!shipping[key]?.trim()) return `${label} is required.`;
+      if (!shipping[key]?.trim()) errors[key] = `${label} is required.`;
     }
-    return null;
+    return errors;
   }
 
   async function handlePay() {
     if (!cardRef.current) return;
     setError(null);
 
-    const shippingError = validateShipping();
-    if (shippingError) {
-      setError(shippingError);
+    const shippingErrors = validateShipping();
+    setFieldErrors(shippingErrors);
+    if (Object.keys(shippingErrors).length > 0) {
+      setError("Please complete the highlighted fields.");
       return;
     }
 
@@ -146,6 +153,15 @@ export function CheckoutForm({ items, appId, locationId, defaultName }: Props) {
   } as const;
   const labelStyle = { color: "rgba(25,28,31,0.6)" } as const;
 
+  function FieldError({ field }: { field: keyof ShippingAddress }) {
+    if (!fieldErrors[field]) return null;
+    return (
+      <p className="mt-1 text-[12px]" style={{ color: "#dc2626" }}>
+        {fieldErrors[field]}
+      </p>
+    );
+  }
+
   return (
     <>
       {/* Square Web Payments SDK */}
@@ -177,6 +193,7 @@ export function CheckoutForm({ items, appId, locationId, defaultName }: Props) {
               className={inputCls}
               style={inputStyle}
             />
+            <FieldError field="name" />
           </div>
 
           <div>
@@ -191,6 +208,7 @@ export function CheckoutForm({ items, appId, locationId, defaultName }: Props) {
               className={inputCls}
               style={inputStyle}
             />
+            <FieldError field="line1" />
           </div>
 
           <div>
@@ -220,6 +238,7 @@ export function CheckoutForm({ items, appId, locationId, defaultName }: Props) {
                 className={inputCls}
                 style={inputStyle}
               />
+              <FieldError field="city" />
             </div>
             <div>
               <label className={labelCls} style={labelStyle}>
@@ -233,6 +252,7 @@ export function CheckoutForm({ items, appId, locationId, defaultName }: Props) {
                 className={inputCls}
                 style={inputStyle}
               />
+              <FieldError field="state" />
             </div>
           </div>
 
@@ -249,6 +269,7 @@ export function CheckoutForm({ items, appId, locationId, defaultName }: Props) {
                 className={inputCls}
                 style={inputStyle}
               />
+              <FieldError field="postalCode" />
             </div>
             <div>
               <label className={labelCls} style={labelStyle}>

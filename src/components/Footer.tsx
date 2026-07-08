@@ -47,6 +47,37 @@ export function Footer() {
             Designers
           </Link>
         </div>
+
+        {/* Company */}
+        <div className="flex flex-col gap-3">
+          <p
+            className="text-[12px] font-semibold uppercase tracking-[1.5px]"
+            style={{ color: "rgb(25,28,31)" }}
+          >
+            Company
+          </p>
+          <Link
+            href="/about"
+            className="text-[14px] hover:underline"
+            style={{ color: "rgba(25,28,31,0.75)" }}
+          >
+            About Us
+          </Link>
+          <Link
+            href="/consign"
+            className="text-[14px] hover:underline"
+            style={{ color: "rgba(25,28,31,0.75)" }}
+          >
+            Consign With Us
+          </Link>
+          <a
+            href="mailto:info@museumgrades.com"
+            className="text-[14px] hover:underline"
+            style={{ color: "rgba(25,28,31,0.75)" }}
+          >
+            info@museumgrades.com
+          </a>
+        </div>
       </div>
 
       <div

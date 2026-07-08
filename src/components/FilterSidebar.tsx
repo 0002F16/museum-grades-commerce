@@ -1,64 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { ChevronUp, ChevronDown, Search, X } from "lucide-react";
-import type { FilterGroup } from "@/types/product";
-
-interface CurrentFilters {
-  brand?: string;
-  condition?: string;
-  color?: string;
-  material?: string;
-  bagType?: string;
-  price?: string;
-  sort?: string;
-}
+import { FACET_KEY, type FacetKey, type FilterGroup } from "@/types/product";
+import { useFilterNav } from "@/components/FilterNavContext";
 
 interface FilterSidebarProps {
   facets: FilterGroup[];
-  currentFilters: CurrentFilters;
+  /** Active values per facet key (multi-select). */
+  currentFilters: Partial<Record<FacetKey, string[]>>;
   total: number;
 }
 
-// Map FilterGroup name → URL param key
-const GROUP_KEY: Record<string, keyof CurrentFilters> = {
-  Designers: "brand",
-  Condition: "condition",
-  "Bag Type": "bagType",
-  Price: "price",
-  Color: "color",
-  Material: "material",
-};
-
 function FilterSection({
   group,
-  currentValue,
-  onSelect,
+  selected,
+  onToggle,
   showSearch = false,
 }: {
   group: FilterGroup;
-  currentValue?: string;
-  onSelect: (key: keyof CurrentFilters, value: string | undefined) => void;
+  selected: string[];
+  onToggle: (key: FacetKey, value: string) => void;
   showSearch?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(true);
   const [showAll, setShowAll] = useState(false);
   const [search, setSearch] = useState("");
-  const paramKey = GROUP_KEY[group.name];
+  const paramKey = FACET_KEY[group.name as keyof typeof FACET_KEY];
 
   const filtered = search
     ? group.options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase()))
     : group.options;
   const visible = showAll ? filtered : filtered.slice(0, 7);
 
-  function handleCheck(label: string) {
-    if (!paramKey) return;
-    onSelect(paramKey, currentValue === label ? undefined : label);
-  }
+  // Anchor target for the header "Designers" link (#designers).
+  const anchorId = paramKey === "brand" ? "designers" : undefined;
 
   return (
-    <div className="border-t py-3" style={{ borderColor: "rgba(25,28,31,0.15)" }}>
+    <div id={anchorId} className="scroll-mt-[120px] border-t py-3" style={{ borderColor: "rgba(25,28,31,0.15)" }}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex w-full items-center justify-between"
@@ -96,36 +75,27 @@ function FilterSection({
               <label key={opt.label} className="flex cursor-pointer items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={currentValue === opt.label}
-                  onChange={() => handleCheck(opt.label)}
+                  checked={selected.includes(opt.label)}
+                  onChange={() => paramKey && onToggle(paramKey, opt.label)}
                   className="h-4 w-4 rounded border"
                   style={{ borderColor: "rgb(229,229,229)" }}
                 />
                 <span className="flex-1 text-[14px]" style={{ color: "rgb(25,28,31)" }}>
                   {opt.label}
                 </span>
-                <span className="text-[14px]" style={{ color: "rgb(112,112,112)" }}>
+                <span className="text-[14px]" style={{ color: "rgb(89,89,89)" }}>
                   ({opt.count.toLocaleString()})
                 </span>
               </label>
             ))}
           </div>
-          {filtered.length > 7 && !showAll && (
+          {filtered.length > 7 && (
             <button
-              onClick={() => setShowAll(true)}
+              onClick={() => setShowAll((s) => !s)}
               className="mt-2 text-[14px]"
               style={{ color: "rgb(0,128,0)" }}
             >
-              Show More
-            </button>
-          )}
-          {showAll && filtered.length > 7 && (
-            <button
-              onClick={() => setShowAll(false)}
-              className="mt-2 text-[14px]"
-              style={{ color: "rgb(0,128,0)" }}
-            >
-              Show Less
+              {showAll ? "Show Less" : "Show More"}
             </button>
           )}
         </div>
@@ -135,29 +105,10 @@ function FilterSection({
 }
 
 export function FilterSidebar({ facets, currentFilters, total }: FilterSidebarProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const { toggle, clearAll } = useFilterNav();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  function updateFilter(key: keyof CurrentFilters, value: string | undefined) {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("page"); // reset to page 1 on filter change
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
-    router.push(`${pathname}?${params.toString()}`);
-  }
-
-  function clearAll() {
-    router.push(pathname);
-  }
-
-  const hasActiveFilters = Object.entries(currentFilters).some(
-    ([k, v]) => k !== "sort" && v
-  );
+  const hasActiveFilters = Object.values(currentFilters).some((v) => v && v.length > 0);
 
   return (
     <aside className="w-full md:w-[280px] md:min-w-[280px] md:flex-shrink-0">
@@ -192,15 +143,18 @@ export function FilterSidebar({ facets, currentFilters, total }: FilterSidebarPr
           </button>
         )}
 
-        {facets.map((group) => (
-          <FilterSection
-            key={group.name}
-            group={group}
-            currentValue={currentFilters[GROUP_KEY[group.name]]}
-            onSelect={updateFilter}
-            showSearch={group.name === "Designers"}
-          />
-        ))}
+        {facets.map((group) => {
+          const key = FACET_KEY[group.name as keyof typeof FACET_KEY];
+          return (
+            <FilterSection
+              key={group.name}
+              group={group}
+              selected={(key && currentFilters[key]) || []}
+              onToggle={toggle}
+              showSearch={group.name === "Designers"}
+            />
+          );
+        })}
       </div>
     </aside>
   );

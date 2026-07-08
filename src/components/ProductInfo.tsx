@@ -122,14 +122,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
         }}
       />
 
-      {/* Display-only notice */}
-      <p
-        className="text-center text-[12px] font-semibold uppercase"
-        style={{ letterSpacing: "1.5px", color: "rgb(112,112,112)" }}
-      >
-        Display Only — Catalogue Reference
-      </p>
-
       {/* Divider */}
       <div
         className="my-2 h-[1px] w-full"

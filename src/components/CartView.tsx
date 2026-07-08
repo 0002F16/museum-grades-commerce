@@ -29,7 +29,7 @@ function AccountNudge() {
         Sign in to save your bag and check out faster.
       </p>
       <Link
-        href="/sign-in"
+        href="/sign-in?returnTo=/cart"
         className="mt-1 inline-flex h-[47px] items-center bg-[rgb(25,28,31)] px-14 text-[12px] font-semibold uppercase tracking-[1.5px] text-white transition-opacity hover:opacity-80"
       >
         Sign In
@@ -164,7 +164,7 @@ export function CartView() {
                       <button
                         onClick={() => removeItem(item.id)}
                         className="text-[12px] transition-colors hover:underline md:text-[13px]"
-                        style={{ color: "rgba(25,28,31,0.45)" }}
+                        style={{ color: "rgba(25,28,31,0.62)" }}
                       >
                         Remove
                       </button>
@@ -185,7 +185,7 @@ export function CartView() {
               <button
                 onClick={clearCart}
                 className="text-[13px] transition-colors hover:underline"
-                style={{ color: "rgba(25,28,31,0.45)" }}
+                style={{ color: "rgba(25,28,31,0.62)" }}
               >
                 Clear Bag
               </button>
@@ -256,7 +256,7 @@ export function CartView() {
                 </button>
               ) : (
                 <Link
-                  href="/sign-in"
+                  href="/sign-in?returnTo=/checkout"
                   className="flex h-[47px] w-full items-center justify-center bg-[rgb(25,28,31)] text-[13px] font-semibold uppercase tracking-[1.5px] text-white transition-opacity hover:opacity-80"
                 >
                   Sign In to Check Out
